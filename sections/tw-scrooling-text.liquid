@@ -1,0 +1,421 @@
+<div
+  id="shopify-section-{{section.id}}"
+  class="shopify-section shopify-section-group-header-group"
+>
+  <style data-shopify="">
+    #shopify-section-{{ section.id }} {
+      /* Animation settings */
+      #shopify-section-{{ section.id }} .text-item {
+        font-size: {{ section.settings.body_font_size }}px;
+        {% if section.settings.custom_body_font_family != blank %}
+          font-family: {{ section.settings.custom_body_font_family }};
+        {% else %}
+          font-family: Raleway-Regular;
+        {% endif %}
+        color: {{ section.settings.Text-color }};
+        font-weight: {{ section.settings.font_weight }};
+      }
+
+      #shopify-section-{{ section.id }} .marquee-inner:hover .marquee-group {
+        animation-play-state: paused;
+      }
+
+      /* Reset any weird theme spacings */
+      #shopify-section-{{ section.id }} .ed_marquee .marquee-group * {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Styles */
+      #shopify-section-{{ section.id }} .ed_marquee {
+        padding-top: {{ section.settings.section_padding_top }}px;
+        padding-bottom: {{ section.settings.section_padding_bottom }}px;
+      }
+
+      #shopify-section-{{ section.id }} .image-item {
+        display: flex;
+        width: auto;
+        height: {{ section.settings.logo_height }}px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @media screen and (max-width: 750px) {
+        #shopify-section-{{ section.id }} .ed_marquee {
+          padding-top: calc({{ section.settings.section_padding_top }}px * 0.75);
+          padding-bottom: calc({{ section.settings.section_padding_bottom }}px * 0.75);
+        }
+      }
+
+      #shopify-section-{{ section.id }} .ed_marquee .marquee-inner {
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+        white-space: nowrap;
+        background-color: {{ section.settings.div-color }};
+        color: {{ section.settings.Text-color }};
+        border-left: 0;
+        border-right: 0;
+        gap: {{ section.settings.item_gap }}px;
+        {% if section.settings.show_border %}
+          border-block: {{ section.settings.border_width }}px solid {{ section.settings.border-color }};
+        {% endif %}
+      }
+
+      #shopify-section-{{ section.id }} .ed_marquee a.marquee-inner {
+        text-decoration: none;
+        color: {{ section.settings.Text-color }};
+      }
+
+      #shopify-section-{{ section.id }} .ed_marquee .marquee-group {
+        padding: 0 {{ section.settings.group_padding }}px;
+        gap: {{ section.settings.item_gap }}px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex: 1 0 auto;
+        {% if section.settings.animation_direction == "left" %}
+          animation: scroll-{{ section.id }} {{ section.settings.animation_speed }}s linear infinite;
+        {% elsif section.settings.animation_direction == "right" %}
+          animation: scrolll-{{ section.id }} {{ section.settings.animation_speed }}s linear infinite;
+        {% endif %}
+        will-change: transform;
+      }
+
+      #shopify-section-{{ section.id }} .marquee-group img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      #shopify-section-{{ section.id }} .scrolling-item {
+        display: flex;
+        align-items: center;
+        gap: {{ section.settings.logo_text_gap }}px;
+      }
+
+      @media screen and (max-width: 750px) {
+        #shopify-section-{{ section.id }} .ed_marquee .marquee-group {
+          padding: 0 {{ section.settings.group_padding | times: 0.8 }}px;
+          gap: {{ section.settings.item_gap | times: 0.8 }}px;
+        }
+        
+        #shopify-section-{{ section.id }} .scrolling-item {
+          gap: {{ section.settings.logo_text_gap | times: 0.8 }}px;
+        }
+        
+        #shopify-section-{{ section.id }} .text-item {
+          font-size: {{ section.settings.body_font_size | times: 0.9 }}px;
+          line-height: 130%;
+          letter-spacing: 0;
+        }
+      }
+
+      #shopify-section-{{ section.id }} .ed_marquee .marquee-group img {
+        height: {{ section.settings.logo_height }}px;
+        width: auto;
+      }
+
+      @media screen and (max-width: 750px) {
+        #shopify-section-{{ section.id }} .ed_marquee .marquee-group img {
+          height: {{ section.settings.logo_height | times: 0.9 }}px;
+        }
+      }
+
+      #shopify-section-{{ section.id }} .logo-item img {
+        height: {{ section.settings.logo_height }}px !important;
+        width: auto !important;
+      }
+    }
+
+    @keyframes scroll-{{ section.id }} {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes scrolll-{{ section.id }} {
+      from {
+        transform: translateX(-50%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+  </style>
+
+  <div class="ed_marquee" id="ed_section-{{ section.id }}">
+    <div class="marquee-inner">
+      <div class="marquee-group">
+        {% for i in (1..section.settings.repeat_count) %}
+          {% for block in section.blocks %}
+            {% if block.type == 'text' %}
+              <div class="scrolling-item text-item">
+                {% if block.settings.Logo %}
+                  <span class="logo-item">
+                    <img src="{{ block.settings.Logo | img_url: section.settings.logo_height | append: 'x' }}" alt="{{ block.settings.text_content }}">
+                  </span>
+                {% endif %}
+                {{ block.settings.text_content }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "TW-ScrollingText-D2",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "div-color",
+      "label": "Background Color",
+      "default": "#008000"
+    },
+    {
+      "type": "color",
+      "id": "Text-color",
+      "label": "Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "border-color",
+      "label": "Border Color",
+      "default": "#008000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "text",
+      "label": "Custom Font Family",
+      "id": "custom_body_font_family",
+      "info": "Enter the name of your custom font family (leave blank to use default ATCArquette)"
+    },
+    {
+      "type": "range",
+      "label": "Font Size",
+      "id": "body_font_size",
+      "default": 16,
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "label": "Font Weight",
+      "id": "font_weight",
+      "default": "400",
+      "options": [
+        {
+          "label": "Light (300)",
+          "value": "300"
+        },
+        {
+          "label": "Normal (400)",
+          "value": "400"
+        },
+        {
+          "label": "Medium (500)",
+          "value": "500"
+        },
+        {
+          "label": "Semi Bold (600)",
+          "value": "600"
+        },
+        {
+          "label": "Bold (700)",
+          "value": "700"
+        },
+        {
+          "label": "Extra Bold (800)",
+          "value": "800"
+        },
+        {
+          "label": "Black (900)",
+          "value": "900"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "select",
+      "label": "Animation Direction",
+      "id": "animation_direction",
+      "default": "left",
+      "options": [
+        {
+          "label": "Left to Right",
+          "value": "left"
+        },
+        {
+          "label": "Right to Left",
+          "value": "right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "label": "Animation Speed",
+      "id": "animation_speed",
+      "default": 60,
+      "min": 10,
+      "max": 300,
+      "step": 10,
+      "unit": "s",
+      "info": "Lower numbers = faster animation"
+    },
+    {
+      "type": "range",
+      "label": "Repeat Count",
+      "id": "repeat_count",
+      "default": 20,
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "info": "How many times to repeat the content for smooth scrolling"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "label": "Section Padding Top",
+      "id": "section_padding_top",
+      "default": 10,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "label": "Section Padding Bottom",
+      "id": "section_padding_bottom",
+      "default": 10,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "label": "Item Gap",
+      "id": "item_gap",
+      "default": 24,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "info": "Space between scrolling items"
+    },
+    {
+      "type": "range",
+      "label": "Group Padding",
+      "id": "group_padding",
+      "default": 5,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "label": "Logo & Text Gap",
+      "id": "logo_text_gap",
+      "default": 10,
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "info": "Space between logo and text within each item"
+    },
+    {
+      "type": "header",
+      "content": "Logo Settings"
+    },
+    {
+      "type": "range",
+      "label": "Logo Height",
+      "id": "logo_height",
+      "default": 20,
+      "min": 10,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Border"
+    },
+    {
+      "type": "checkbox",
+      "label": "Show Border",
+      "id": "show_border",
+      "default": true
+    },
+    {
+      "type": "range",
+      "label": "Border Width",
+      "id": "border_width",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Scrolling Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text_content",
+          "label": "Text Content",
+          "placeholder": "Enter your scrolling text"
+        },
+        {
+          "type": "image_picker",
+          "id": "Logo",
+          "label": "Logo (Optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TW-ScrollingText-D2",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": {
+            "text_content": "Sample scrolling text"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

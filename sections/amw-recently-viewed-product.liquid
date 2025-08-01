@@ -1,0 +1,214 @@
+<style>
+  .RecentProductsPDP {
+    position: relative;
+  }
+
+  .recently_product_padding {
+    padding-inline: 7px;
+    padding-bottom: 9px;
+  }
+
+  .related-products-content {
+    display: flex;
+    gap: 15px; /* Maintain the gap between the cards */
+    padding-top: 26px;
+    overflow-x: scroll; /* Enable horizontal scrolling */
+    scroll-snap-type: x mandatory; /* Adds snapping effect */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+
+  .product-card_outer {
+    display: block;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #fff;
+    transition: box-shadow 0.2s ease;
+    background-color: #fefae0;
+    border-radius: 1rem;
+    flex: 0 0 auto; /* Prevent cards from growing or shrinking */
+    scroll-snap-align: start; /* Align each card at the start of the container */
+  }
+
+
+  .product-card_image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 7px;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  .product-card_title {
+    font-family: Raleway-Regular;
+    font-size: 12px;
+    line-height: normal;
+    text-align: left;
+    color: #000;
+    padding-top: 4px;
+    display: -webkit-box;  /* Enables the multi-line truncation */
+    -webkit-line-clamp: 2;  /* Limits the text to 2 lines */
+    -webkit-box-orient: vertical;  /* Specifies vertical layout for the box */
+    overflow: hidden;  /* Hides text that overflows */
+    text-overflow: ellipsis;  /* Adds ellipsis when text is truncated */
+  }
+
+  .product-card_price-cont {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding-block: 6px;
+  }
+
+  @media(max-width: 768px) {
+    .related-products-content {
+      flex-wrap: nowrap; /* Prevent wrapping of items */
+      gap: 7px;
+      padding-top: 20px;
+    }
+
+    .product-card_image {
+      margin-bottom: 0px;
+    }
+
+    .product-card_outer {
+      flex: 0 0 48%; /* Display two cards per row on mobile */
+    }
+  }
+
+  @media(min-width: 769px) {
+    .related-products-content {
+      gap: 15px; /* Maintain original gap on desktop */
+    }
+
+    .product-card_outer {
+      flex: 0 0 24%; /* Display four cards per row on desktop */
+    }
+  }
+
+  /* Hide scrollbar but still allow scrolling */
+  .related-products-content::-webkit-scrollbar {
+    display: none; /* Hides the scrollbar */
+  }
+
+  .related-products-content {
+    -ms-overflow-style: none;  /* Hides scrollbar for IE and Edge */
+    scrollbar-width: none;  /* Hides scrollbar for Firefox */
+  }
+  .atc-rect{
+         padding: .8rem;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+</style>
+
+
+
+<div id="RecentProductsPDP" class="RecentProductsPDP page-width">
+  <div class="container">
+    <div class="recent_heading">
+      <h2 class="dw-heading-special scroll-trigger animate--slide-in">
+          {{ section.settings.heading }}
+      </h2>
+    </div>
+    <div class="related-products-content recentGridPdp scroll-trigger animate--slide-in"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  function updateRecentlyViewed() {
+    const recentProducts = JSON.parse(localStorage.getItem("recentPdp")) || [];
+    console.log("Recent Products in Local Storage:", recentProducts);
+
+    const currentProduct = {
+      id: {{ product.selected_or_first_available_variant.id }},
+      product: {{ product | json }}
+    };
+
+    // Add the current product if not already in the recent products list
+    const isAlreadyViewed = recentProducts.some(item => item.id === currentProduct.id);
+    if (!isAlreadyViewed) {
+      recentProducts.push(currentProduct);
+      if (recentProducts.length > 15) {
+        recentProducts.shift(); // Keep only the latest 15 items
+      }
+      localStorage.setItem("recentPdp", JSON.stringify(recentProducts));
+    }
+
+    // Display the heading and render the grid
+    if (recentProducts.length > 1) {
+      document.querySelector(".recent_heading").style.display = "block";
+      renderRecentlyViewed(recentProducts);
+    } else {
+      document.querySelector(".recent_heading").style.display = "none";
+    }
+  }
+
+  function renderRecentlyViewed(products) {
+    let html = "";
+
+    products.reverse().forEach(product => {
+      if (!product.product || !product.product.featured_image || !product.product.price) {
+        console.error("Incomplete product data:", product);
+        return;
+      }
+
+      const isDiscounted = product.product.compare_at_price > product.product.price;
+
+      // Divide the price by 100
+      const priceInHundreds = (product.product.price / 100).toFixed(2);
+      const comparePriceInHundreds = (product.product.compare_at_price / 100).toFixed(2);
+
+      html += `
+        <a href="${product.product.handle}" class="animate--hover-vertical-lift product-card_outer ${product.product.id}">
+          <img src="${product.product.featured_image}" alt="${product.product.featured_image.alt || ''}" class="product-card_image">
+          <div class="recently_product_padding">
+          <div class="product-card_title">${product.product.title || 'No title'}</div>
+          <div class="product-card_price-cont">
+            <div class="amw-price-container">
+              ₹${priceInHundreds} 
+            </div>
+            ${
+              isDiscounted
+                ? `<div class="amw-com-price-container">₹${comparePriceInHundreds}</div>`  <!-- Display compare_at_price divided by 100 -->
+                : ""
+            }
+          </div>
+            <button action="/cart/add" class="amw-new-buy-btn atc-rect button">View Details</button>
+          </div>
+              
+        </a>
+      `;
+    });
+    const gridContainer = document.querySelector(".recentGridPdp");
+    if (gridContainer) {
+      gridContainer.innerHTML = html;
+    } else {
+      console.error("recentGridPdp container not found in DOM.");
+    }
+  }
+
+  updateRecentlyViewed();
+});
+
+
+</script>
+
+{% schema %}
+{
+  "name": "Recently Viewed",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Recently Viewed"
+    }
+  ]
+}
+{% endschema %}

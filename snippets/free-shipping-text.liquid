@@ -1,0 +1,106 @@
+<style>
+ 
+
+  .sp-free-shipping-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #e1ede3;
+    border: 1px solid #2f903b;
+    border-left: 4px solid #bc6c25;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #2f903b;
+    max-width: 100%;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+     width:fit-content;
+  }
+
+  .sp-free-shipping-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .sp-truck-icon {
+    font-size: 22px;
+    line-height: 1;
+    animation: truckBounce 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 4px #2f903b);
+  }
+
+  .sp-message-text {
+    line-height: normal;
+  }
+
+  .sp-message-text .price-highlight {
+    color: #ff0080;
+    font-size: 18px;
+    font-weight: 900;
+   /* text-shadow: 0 0 10px #ff0080;
+     animation:
+      priceFlicker 0.15s infinite alternate,
+      pricePulse 2.5s infinite ease-in-out;
+  } */
+
+  @keyframes truckBounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes priceFlicker {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.85;
+    }
+  }
+
+  @keyframes pricePulse {
+    0% {
+      text-shadow: 0 0 8px #ff0080;
+    }
+    50% {
+      text-shadow: 0 0 12px #ff0080, 0 0 6px #ff0080;
+    }
+    100% {
+      text-shadow: 0 0 8px #ff0080;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sp-free-shipping-card {
+      padding: 12px 18px;
+      font-size: 14px;
+    }
+
+    .sp-truck-icon {
+      font-size: 20px;
+    }
+
+    .sp-message-text .price-highlight {
+      font-size: 16px;
+    }
+  }
+</style>
+
+<div class="sp-free-shipping-wrapper">
+  <div class="sp-free-shipping-card">
+    <span class="sp-truck-icon">🚛</span>
+    <span class="sp-message-text">
+      Free shipping on orders over <span class="price-highlight">₹499</span>
+    </span>
+  </div>
+</div>

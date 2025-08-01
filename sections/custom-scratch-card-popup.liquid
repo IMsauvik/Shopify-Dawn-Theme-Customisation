@@ -1,0 +1,418 @@
+{% comment %}
+  Scratch Card Email Popup Section (v4 - Using Shopify Form Logic)
+  - Relies on Shopify's {% form 'customer' %} for submission.
+  - JS handles validation, phone formatting, and triggers scratch reveal on *client-side* validation success.
+{% endcomment %}
+
+{% schema %}
+
+{
+  "name": "Scratch Card Popup 2",
+  "settings": [
+    { "type": "header", "content": "Popup Settings" },
+    { "type": "text", "id": "popup_title", "label": "Popup Title", "default": "Unlock Your Special Discount!" },
+    { "type": "text", "id": "popup_subtitle", "label": "Popup Subtitle", "default": "Sign up to reveal your exclusive scratch card offer" },
+    { "type": "checkbox", "id": "show_on_page_load", "label": "Show on Page Load", "info": "Popup will show after delay unless user has seen it within the last day.", "default": true },
+    { "type": "range", "id": "popup_delay", "label": "Popup Delay (seconds)", "min": 0, "max": 30, "step": 1, "default": 3, "info": "Delay before showing popup on page load." },
+    { "type": "header", "content": "Form Settings" },
+    { "type": "text", "id": "email_label", "label": "Email Field Label", "default": "Email Address" },
+    { "type": "text", "id": "phone_label", "label": "Phone Field Label", "default": "Phone Number" },
+    { "type": "text", "id": "consent_text", "label": "Marketing Consent Text", "default": "I agree to receive promotional emails and marketing information. You can unsubscribe at any time." },
+    { "type": "text", "id": "button_text", "label": "Submit Button Text", "default": "Get My Scratch Card" },
+    { "type": "text", "id": "tag_on_submit", "label": "Tag Customer With", "default": "scratch-popup", "info": "Tag applied to the customer record on successful submission. Separate multiple tags with commas." },
+    { "type": "header", "content": "Scratch Card Settings" },
+    { "type": "text", "id": "win_heading", "label": "Win Heading", "default": "Congratulations!" },
+    { "type": "text", "id": "win_message", "label": "Win Message", "default": "You've won an exclusive Rs 50 discount on our featured product!" },
+    { "type": "text", "id": "discount_amount", "label": "Discount Amount Label", "default": "Flat Rs 50 off", "info": "Text displayed in the discount badge (e.g., 'Flat Rs 50 off', '15% OFF')." },
+    { "type": "text", "id": "discount_code", "label": "Discount Code", "default": "SCRATCH50", "info": "The actual discount code to display." },
+    { "type": "text", "id": "scratch_instruction_text", "label": "Scratch Instruction Text", "default": "Scratch to reveal your discount!" },
+    { "type": "header", "content": "Product Settings" },
+    { "type": "product", "id": "featured_product", "label": "Featured Product", "info": "Product shown on the revealed scratch card." },
+    { "type": "text", "id": "product_button_text", "label": "Product Button Text", "default": "Shop Now" },
+    { "type": "header", "content": "Color Settings" },
+    { "type": "color", "id": "primary_color", "label": "Primary Color", "default": "#4A5568", "info": "Used for popup header background." },
+    { "type": "color", "id": "accent_color", "label": "Accent Color", "default": "#5D3FD3", "info": "Used for buttons, discount code, etc." },
+    { "type": "color", "id": "scratch_layer_color", "label": "Scratch Layer Color", "default": "#CCCCCC", "info": "Color of the scratchable surface." }
+  ],
+  "presets": [ { "name": "Scratch Card Popup 2", "category": "Promotional" } ]
+}
+{% endschema %}
+
+<style>
+  {# --- CSS remains exactly the same as before --- #}
+  :root {
+    --sc-primary-color: {{ section.settings.primary_color }};
+    --sc-accent-color: {{ section.settings.accent_color }};
+    --sc-scratch-layer-color: {{ section.settings.scratch_layer_color }};
+    --sc-text-color: #2D3748;
+    --sc-border-radius: 8px;
+    --sc-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  .scratch-popup-overlay[data-section-id="{{ section.id }}"] { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-out, visibility 0.3s ease-out; padding: 15px; box-sizing: border-box; }
+  .scratch-popup-overlay[data-section-id="{{ section.id }}"].active { opacity: 1; visibility: visible; }
+  .scratch-popup-container[data-section-id="{{ section.id }}"] { background-color: white; border-radius: var(--sc-border-radius); box-shadow: var(--sc-box-shadow); width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; position: relative; animation: sc-slideIn 0.5s ease-out forwards; transform: translateY(20px); opacity: 0; display: flex; flex-direction: column; }
+  @keyframes sc-slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .scratch-popup-header[data-section-id="{{ section.id }}"] { background-color: var(--sc-primary-color); color: white; padding: 15px 45px 15px 20px; text-align: center; position: relative; flex-shrink: 0; }
+  .scratch-popup-header[data-section-id="{{ section.id }}"] h2 { font-size: 1.3rem; margin: 0 0 5px 0; font-weight: 600; }
+  .scratch-popup-header[data-section-id="{{ section.id }}"] p { font-size: 0.9rem; opacity: 0.9; margin: 0; }
+  .scratch-close-btn[data-section-id="{{ section.id }}"] { position: absolute; top: 8px; right: 10px; background: none; border: none; color: white; font-size: 1.6rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; padding: 5px; line-height: 1; font-weight: 300; }
+  .scratch-close-btn[data-section-id="{{ section.id }}"]:hover { opacity: 1; }
+  .scratch-popup-content[data-section-id="{{ section.id }}"] { padding: 25px; flex-grow: 1; }
+  .scratch-form-group[data-section-id="{{ section.id }}"] { margin-bottom: 15px; }
+  .scratch-form-group[data-section-id="{{ section.id }}"] label { display: block; margin-bottom: 5px; color: var(--sc-text-color); font-size: 0.9rem; font-weight: 500; }
+  .scratch-form-group[data-section-id="{{ section.id }}"] input[type="email"],
+  .scratch-form-group[data-section-id="{{ section.id }}"] input[type="tel"] { width: 100%; padding: 10px 12px; border: 1px solid #CBD5E0; border-radius: var(--sc-border-radius); font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
+  .scratch-form-group[data-section-id="{{ section.id }}"] input:focus { border-color: var(--sc-accent-color); outline: none; box-shadow: 0 0 0 3px rgba(93, 63, 211, 0.2); }
+  /* Phone Input */
+  .phone-input-wrapper[data-section-id="{{ section.id }}"] { position: relative; }
+  .phone-prefix[data-section-id="{{ section.id }}"] { position: absolute; top: 1px; left: 1px; height: calc(100% - 2px); display: flex; align-items: center; padding: 0 10px; z-index: 2; pointer-events: none; color: var(--sc-text-color); font-size: 1rem; border-right: 1px solid #CBD5E0; background-color: #f8f9fa; border-radius: var(--sc-border-radius) 0 0 var(--sc-border-radius); }
+  .phone-prefix[data-section-id="{{ section.id }}"] .country-flag { width: 21px; height: 15px; margin-right: 8px; flex-shrink: 0; box-shadow: 0 0 1px rgba(0,0,0,0.3); }
+  #scratchPhoneInput_{{ section.id }} { padding-left: 85px !important; } /* Target the actual input ID */
+  .scratch-checkbox-group[data-section-id="{{ section.id }}"] { display: flex; align-items: flex-start; margin-bottom: 20px; }
+  .scratch-checkbox-group[data-section-id="{{ section.id }}"] input[type="checkbox"] { margin-right: 10px; margin-top: 3px; flex-shrink: 0; }
+  .scratch-checkbox-group[data-section-id="{{ section.id }}"] label { font-size: 0.8rem; color: var(--sc-text-color); line-height: 1.4; }
+  .scratch-submit-btn[data-section-id="{{ section.id }}"] { background-color: var(--sc-accent-color); color: white; border: none; border-radius: var(--sc-border-radius); padding: 12px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .scratch-submit-btn[data-section-id="{{ section.id }}"]:hover:not(:disabled) { background-color: color-mix(in srgb, var(--sc-accent-color), black 10%); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+  .scratch-submit-btn[data-section-id="{{ section.id }}"]:active:not(:disabled) { transform: scale(0.98); }
+  .scratch-submit-btn[data-section-id="{{ section.id }}"]:disabled { opacity: 0.7; cursor: not-allowed; } /* Changed cursor */
+  /* Error Message */
+  .form-error-message[data-section-id="{{ section.id }}"] { color: #e53e3e; font-size: 0.875rem; margin-top: 10px; text-align: center; }
+  /* Scratch Card Styles */
+  .scratch-card-container[data-section-id="{{ section.id }}"] { display: none; position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 380px; margin-top: 20px; border-radius: var(--sc-border-radius); overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.1); background-color: #f0f0f0; }
+  .scratch-card-area[data-section-id="{{ section.id }}"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; }
+  #scratchCard_{{ section.id }} { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 25; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(255,255,255,0.5)' stroke='%23333333' stroke-width='2'/%3E%3C/svg%3E") 16 16, grab; border-radius: var(--sc-border-radius); touch-action: none; }
+  #scratchCard_{{ section.id }}:active { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(200,200,200,0.6)' stroke='%23333333' stroke-width='2'/%3E%3C/svg%3E") 16 16, grabbing; }
+  .scratch-content[data-section-id="{{ section.id }}"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: linear-gradient(135deg, #ffffff 0%, #f8f8ff 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; }
+  .scratch-win-title[data-section-id="{{ section.id }}"] { font-size: 1.8rem; font-weight: 700; color: #333; margin-bottom: 10px; }
+  .scratch-win-message[data-section-id="{{ section.id }}"] { font-size: 1rem; color: #555; margin-bottom: 15px; max-width: 90%; }
+  .scratch-discount-badge[data-section-id="{{ section.id }}"] { background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-radius: 50px; padding: 8px 25px; margin-bottom: 20px; font-size: 1.6rem; font-weight: 700; color: var(--sc-accent-color); border: 2px solid var(--sc-accent-color); }
+  .scratch-product-container[data-section-id="{{ section.id }}"] { display: flex; align-items: center; width: 100%; max-width: 300px; background: #ffffff; border: 1px solid #eee; border-radius: var(--sc-border-radius); padding: 12px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  .scratch-product-image[data-section-id="{{ section.id }}"] { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; margin-right: 12px; flex-shrink: 0; }
+  .scratch-product-image[data-section-id="{{ section.id }}"].placeholder-svg { width: 60px; height: 60px; margin-right: 12px; flex-shrink: 0; border: 1px solid #eee; background-color: #f9f9f9; color: #ccc; }
+  .scratch-product-details[data-section-id="{{ section.id }}"] { flex: 1; text-align: left; min-width: 0; }
+  .scratch-product-title[data-section-id="{{ section.id }}"] { font-size: 0.9rem; font-weight: 600; color: #333; margin: 0 0 5px 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scratch-discount-code[data-section-id="{{ section.id }}"] { display: inline-block; background: color-mix(in srgb, var(--sc-accent-color), white 90%); color: var(--sc-accent-color); font-weight: 600; padding: 4px 10px; border: 1px dashed var(--sc-accent-color); border-radius: 4px; font-size: 0.85rem; }
+  .scratch-shop-now-btn[data-section-id="{{ section.id }}"] { display: inline-block; background-color: var(--sc-accent-color); color: white; font-weight: 600; padding: 10px 20px; border-radius: var(--sc-border-radius); text-decoration: none; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s; font-size: 0.95rem; }
+  .scratch-shop-now-btn[data-section-id="{{ section.id }}"]:hover { background-color: color-mix(in srgb, var(--sc-accent-color), black 10%); transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); }
+  /* Instructions & Arrows */
+  .scratch-instruction[data-section-id="{{ section.id }}"] { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.6); color: white; font-size: 1rem; font-weight: 500; padding: 8px 20px; border-radius: 30px; z-index: 30; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); pointer-events: none; transition: opacity 0.3s ease-out; }
+  .scratch-arrow[data-section-id="{{ section.id }}"] { position: absolute; width: 25px; height: 25px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h13'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 30; opacity: 0.7; animation: sc-floatArrow 1.5s infinite ease-in-out; pointer-events: none; transition: opacity 0.3s ease-out; }
+  .scratch-arrow[data-section-id="{{ section.id }}"].arrow-1 { top: 35%; left: 10%; transform: rotate(-45deg); animation-delay: 0s; --arrow-rotation: -45deg; }
+  .scratch-arrow[data-section-id="{{ section.id }}"].arrow-2 { top: 60%; right: 10%; transform: rotate(135deg); animation-delay: 0.2s; --arrow-rotation: 135deg; }
+  @keyframes sc-floatArrow { 0%, 100% { transform: translate(0, 0) rotate(var(--arrow-rotation)); } 50% { transform: translate(-3px, -3px) rotate(var(--arrow-rotation)); } }
+  /* Confetti */
+  .confetti[data-section-id="{{ section.id }}"] { position: absolute; width: 8px; height: 8px; background-color: #f00; opacity: 0; pointer-events: none; z-index: 35; animation: sc-confetti-fall 3s ease-out forwards; }
+  @keyframes sc-confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(calc(var(--sc-container-height, 400px) + 20px)) rotate(720deg); opacity: 0; } }
+  /* Utility */
+  .sc-hidden[data-section-id="{{ section.id }}"] { display: none !important; }
+  .sc-fade-out[data-section-id="{{ section.id }}"] { animation: sc-fadeOut 0.5s forwards ease-out; }
+  @keyframes sc-fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+  .sc-slide-down[data-section-id="{{ section.id }}"] { animation: sc-slideDown 0.5s forwards ease-out; }
+  @keyframes sc-slideDown { from { transform: translateY(-15px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+  /* Responsive */
+  @media (max-width: 480px) {
+    .scratch-popup-container[data-section-id="{{ section.id }}"] { max-width: 95%; }
+    .scratch-popup-header[data-section-id="{{ section.id }}"] h2 { font-size: 1.2rem; }
+    .scratch-win-title[data-section-id="{{ section.id }}"] { font-size: 1.6rem; }
+    .scratch-discount-badge[data-section-id="{{ section.id }}"] { font-size: 1.4rem; padding: 6px 20px; }
+    .scratch-product-container[data-section-id="{{ section.id }}"] { flex-direction: column; align-items: center; text-align: center; padding: 10px; }
+    .scratch-product-image[data-section-id="{{ section.id }}"] { margin-right: 0; margin-bottom: 8px; width: 50px; height: 50px; }
+    .scratch-product-image[data-section-id="{{ section.id }}"].placeholder-svg { margin-right: 0; margin-bottom: 8px; width: 50px; height: 50px; }
+    .scratch-product-details[data-section-id="{{ section.id }}"] { text-align: center; }
+    .scratch-product-title[data-section-id="{{ section.id }}"] { font-size: 0.85rem; white-space: normal; overflow: visible; text-overflow: clip; }
+    .scratch-discount-code[data-section-id="{{ section.id }}"] { font-size: 0.8rem; padding: 3px 8px; margin-top: 3px; }
+    .scratch-shop-now-btn[data-section-id="{{ section.id }}"] { font-size: 0.9rem; padding: 8px 16px; }
+    #scratchPhoneInput_{{ section.id }} { padding-left: 80px !important; }
+  }
+
+</style>
+
+<div class="scratch-popup-section" data-section-id="{{ section.id }}" data-section-type="scratch-popup">
+  <div class="scratch-popup-overlay" id="scratchPopupOverlay_{{ section.id }}" data-section-id="{{ section.id }}">
+    <div class="scratch-popup-container" id="scratchPopupContainer_{{ section.id }}" data-section-id="{{ section.id }}">
+      <div class="scratch-popup-header" data-section-id="{{ section.id }}">
+        <button class="scratch-close-btn" id="scratchCloseBtn_{{ section.id }}" aria-label="Close popup" data-section-id="{{ section.id }}">×</button>
+        <h2>{{ section.settings.popup_title | escape }}</h2>
+        <p>{{ section.settings.popup_subtitle | escape }}</p>
+      </div>
+
+      <div class="scratch-popup-content" data-section-id="{{ section.id }}">
+        {%- comment -%} Use Shopify Form Tag for built-in handling {%- endcomment -%}
+        {%- form 'customer', id: 'scratchSignupForm_' | append: section.id, class: 'scratch-signup-form', novalidate: 'novalidate' -%}
+
+          {%- comment -%} Display form errors, if any {%- endcomment -%}
+          {%- if form.posted_successfully? -%}
+            {%- comment -%} Success handled by JS now, but could add a message here if needed {%- endcomment -%}
+          {%- elsif form.errors -%}
+            <div class="form-error-message" data-section-id="{{ section.id }}">
+              {{ form.errors | default_errors }}
+            </div>
+          {%- endif -%}
+
+          <div class="scratch-form-group" data-section-id="{{ section.id }}">
+            <label for="scratchEmail_{{ section.id }}">{{ section.settings.email_label | escape }}</label>
+            <input type="email" id="scratchEmail_{{ section.id }}" name="contact[email]" placeholder="Enter your email" required aria-required="true" autocomplete="email" {% if form.errors contains 'email' %}aria-invalid="true"{% endif %}>
+          </div>
+
+          <div class="scratch-form-group" data-section-id="{{ section.id }}">
+            <label for="scratchPhoneInput_{{ section.id }}">{{ section.settings.phone_label | escape }}</label>
+            <div class="phone-input-wrapper" data-section-id="{{ section.id }}">
+               <span class="phone-prefix" data-section-id="{{ section.id }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 15" width="21" height="15" class="country-flag"> <defs><clipPath id="a_{{ section.id }}"><path d="M0 0h21v15H0z"/></clipPath></defs> <g clip-path="url(#a_{{ section.id }})"> <path fill="#f93" d="M0 0h21v5H0z"/><path fill="#fff" d="M0 5h21v5H0z"/><path fill="#128807" d="M0 10h21v5H0z"/> <g transform="matrix(.5083 0 0 .5083 10.5 7.5)"> <circle r="6.5" fill="#008" stroke="#fff" stroke-width=".9"/><circle r="3.5" fill="#fff"/><circle r="2.6" fill="#008"/> <path stroke="#008" stroke-width=".8" d="M0-13L0 13M-13 0l13 0m-9.192-9.192L9.192 9.192m-18.384 0L0 0l9.192-9.192"/> </g> </g> </svg>
+                  <span>+91</span>
+               </span>
+              <input
+                type="tel"
+                id="scratchPhoneInput_{{ section.id }}"
+                name="contact[phone]" {# Direct name, value will be modified by JS #}
+                placeholder="Enter 10 digit number"
+                required aria-required="true" pattern="\d{10}" maxlength="10" inputmode="tel" autocomplete="tel-national"
+                {% if form.errors contains 'phone' %}aria-invalid="true"{% endif %}
+              >
+            </div>
+          </div>
+
+          <div class="scratch-checkbox-group" data-section-id="{{ section.id }}">
+            <input type="checkbox" id="scratchMarketingConsent_{{ section.id }}" name="contact[accepts_marketing]" value="true" required aria-required="true">
+            <label for="scratchMarketingConsent_{{ section.id }}">{{ section.settings.consent_text | escape }}</label>
+          </div>
+
+          {%- assign tags = "newsletter," | append: section.settings.tag_on_submit | default: "scratch-popup" -%}
+          <input type="hidden" name="contact[tags]" value="{{ tags | escape }}">
+
+          <button type="submit" class="scratch-submit-btn" id="scratchSubmitBtn_{{ section.id }}" data-section-id="{{ section.id }}">{{ section.settings.button_text | escape }}</button>
+          {%- comment -%} JS will handle error display now in scratchFormError p tag {%- endcomment -%}
+          <p id="scratchFormError_{{ section.id }}" class="form-error-message" style="display: none;" data-section-id="{{ section.id }}"></p>
+        {%- endform -%}
+
+        <!-- Scratch Card Area -->
+        <div class="scratch-card-container" id="scratchCardContainer_{{ section.id }}" data-section-id="{{ section.id }}">
+          <!-- Content underneath -->
+          <div class="scratch-content" data-section-id="{{ section.id }}">
+             <h2 class="scratch-win-title" data-section-id="{{ section.id }}">{{ section.settings.win_heading | escape }}</h2>
+             <p class="scratch-win-message" data-section-id="{{ section.id }}">{{ section.settings.win_message | escape }}</p>
+             <div class="scratch-discount-badge" data-section-id="{{ section.id }}">{{ section.settings.discount_amount | escape }}</div>
+             <div class="scratch-product-container" data-section-id="{{ section.id }}">
+               {%- liquid
+                 assign product_handle = section.settings.featured_product
+                 assign product = all_products[product_handle]
+                 assign show_product = false
+                 if product_handle != blank and product != blank
+                   assign show_product = true
+                   assign product_img_url = product.featured_image | image_url: width: 120, height: 120, crop: 'center'
+                   assign product_title = product.title
+                   assign product_url = product.url
+                 else
+                   assign product_img_placeholder = 'product-1' | placeholder_svg_tag: 'placeholder-svg scratch-product-image' | replace: '<svg', '<svg data-section-id="' | append: section.id | append: '"'
+                   assign product_title = 'Featured Product Title'
+                   assign product_url = '/collections/all'
+                 endif
+               -%}
+               {% if show_product %}
+                 <img class="scratch-product-image" data-section-id="{{ section.id }}" src="{{ product_img_url }}" alt="{{ product_title | escape }}" loading="lazy" width="60" height="60">
+               {% else %}
+                  {{ product_img_placeholder }}
+               {% endif %}
+               <div class="scratch-product-details" data-section-id="{{ section.id }}">
+                 <h3 class="scratch-product-title" data-section-id="{{ section.id }}">{{ product_title | escape }}</h3>
+                 <span class="scratch-discount-code" data-section-id="{{ section.id }}">{{ section.settings.discount_code | escape }}</span>
+               </div>
+             </div>
+             <a href="{{ product_url }}" class="scratch-shop-now-btn" data-section-id="{{ section.id }}">{{ section.settings.product_button_text | escape }}</a>
+          </div>
+          <!-- Scratch layer -->
+          <div class="scratch-card-area" id="scratchCardArea_{{ section.id }}" data-section-id="{{ section.id }}">
+            <canvas id="scratchCard_{{ section.id }}" data-section-id="{{ section.id }}"></canvas>
+            <div class="scratch-instruction" id="scratchInstruction_{{ section.id }}" data-section-id="{{ section.id }}">{{ section.settings.scratch_instruction_text | escape }}</div>
+            <div class="scratch-arrow arrow-1" data-section-id="{{ section.id }}"></div>
+            <div class="scratch-arrow arrow-2" data-section-id="{{ section.id }}"></div>
+          </div>
+        </div> <!-- /scratch-card-container -->
+      </div> <!-- /scratch-popup-content -->
+    </div> <!-- /scratch-popup-container -->
+  </div> <!-- /scratch-popup-overlay -->
+</div>
+
+<script>
+  //<![CDATA[
+  (function() {
+    const SECTION_ID = '{{ section.id }}';
+    console.log(`Scratch Card (${SECTION_ID}): Initializing script (v4 - Shopify Form Logic).`);
+
+    const SHOW_ON_LOAD = {{ section.settings.show_on_page_load | json }};
+    const POPUP_DELAY = {{ section.settings.popup_delay | default: 3 | times: 1000 }};
+    const SCRATCH_LAYER_COLOR = '{{ section.settings.scratch_layer_color }}';
+
+    // Get elements
+    const popupOverlay = document.getElementById(`scratchPopupOverlay_${SECTION_ID}`);
+    const popupContainer = document.getElementById(`scratchPopupContainer_${SECTION_ID}`);
+    const closeBtn = document.getElementById(`scratchCloseBtn_${SECTION_ID}`);
+    const signupForm = document.getElementById(`scratchSignupForm_${SECTION_ID}`); // Form element itself
+    const emailInput = document.getElementById(`scratchEmail_${SECTION_ID}`);
+    const phoneInput = document.getElementById(`scratchPhoneInput_${SECTION_ID}`); // The visible tel input
+    const consentCheckbox = document.getElementById(`scratchMarketingConsent_${SECTION_ID}`);
+    const submitButton = document.getElementById(`scratchSubmitBtn_${SECTION_ID}`);
+    const formErrorDisplay = document.getElementById(`scratchFormError_${SECTION_ID}`); // Where JS validation errors show
+    const scratchContainer = document.getElementById(`scratchCardContainer_${SECTION_ID}`);
+    const scratchArea = document.getElementById(`scratchCardArea_${SECTION_ID}`);
+    const canvas = document.getElementById(`scratchCard_${SECTION_ID}`);
+    const instruction = document.getElementById(`scratchInstruction_${SECTION_ID}`);
+    const arrows = scratchArea ? scratchArea.querySelectorAll('.scratch-arrow') : null;
+
+    // Check elements
+    let elementsMissing = false;
+    const requiredElements = { popupOverlay, popupContainer, closeBtn, signupForm, emailInput, phoneInput, consentCheckbox, submitButton, formErrorDisplay, scratchContainer, scratchArea, canvas, instruction };
+    for (const key in requiredElements) { if (!requiredElements[key]) { console.error(`Scratch Card (${SECTION_ID}): Element missing: ${key}`); elementsMissing = true; } }
+    if (elementsMissing) { return; }
+
+    let scratchCardInstance = null;
+    let popupOpen = false;
+    let isSubmitting = false; // Prevent double submissions
+
+    // --- Popup Logic ---
+    function initPopup() {
+      console.log(`Scratch Card (${SECTION_ID}): initPopup called.`);
+      try {
+        const cookieName = `sc_popup_seen_${SECTION_ID}`;
+        const hasSeenPopup = getCookie(cookieName);
+        if (SHOW_ON_LOAD && !hasSeenPopup && !Shopify.designMode) { setTimeout(showPopup, POPUP_DELAY); }
+        closeBtn.removeEventListener('click', hidePopup); closeBtn.addEventListener('click', hidePopup);
+        popupOverlay.removeEventListener('click', handleOverlayClick); popupOverlay.addEventListener('click', handleOverlayClick);
+
+        // --- Add submit listener for VALIDATION & PHONE FORMATTING ---
+        signupForm.removeEventListener('submit', handleValidationAndFormatting);
+        signupForm.addEventListener('submit', handleValidationAndFormatting);
+
+      } catch (error) { console.error(`Scratch Card (${SECTION_ID}) - Error in initPopup:`, error); }
+    }
+    function handleOverlayClick(e) { if (e.target === popupOverlay) hidePopup(); }
+    function showPopup() {
+      if (popupOpen || popupOverlay.classList.contains('active')) return;
+      popupOpen = true; popupOverlay.classList.add('active'); void popupContainer.offsetWidth;
+      popupContainer.style.opacity = '1'; popupContainer.style.transform = 'translateY(0)';
+      setCookie(`sc_popup_seen_${SECTION_ID}`, 'true', 1); document.body.style.overflow = 'hidden';
+    }
+    function hidePopup() {
+      if (!popupOpen) return;
+      popupOpen = false; popupOverlay.classList.remove('active'); popupContainer.style.opacity = '0';
+      popupContainer.style.transform = 'translateY(20px)'; document.body.style.overflow = '';
+      // Optional: resetPopupState(); // Consider if needed on close
+    }
+
+    // --- Validation & Pre-Submit Modifications ---
+    function handleValidationAndFormatting(e) {
+      console.log(`Scratch Card (${SECTION_ID}): 'submit' event caught. Running validation.`);
+      if (isSubmitting) {
+        console.log(`Scratch Card (${SECTION_ID}): Already submitting, preventing duplicate.`);
+        e.preventDefault(); // Prevent multiple submissions
+        return;
+      }
+
+      formErrorDisplay.textContent = ''; formErrorDisplay.style.display = 'none';
+      let isValid = true; let errors = [];
+      const emailValue = emailInput.value.trim();
+      const phoneDigits = phoneInput.value.trim(); // Just the digits
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailValue || !emailRegex.test(emailValue)) { isValid = false; errors.push('Please enter a valid email address.'); if (errors.length === 1) emailInput.focus(); }
+
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneDigits || !phoneRegex.test(phoneDigits)) { isValid = false; if (errors.length === 0) { errors.push('Please enter a valid 10-digit phone number.'); if (errors.length === 1) phoneInput.focus(); } }
+
+      if (!consentCheckbox.checked) { isValid = false; if (errors.length === 0) { errors.push('Please agree to the terms.'); if (errors.length === 1) consentCheckbox.focus(); } }
+
+      if (!isValid) {
+          console.warn(`Scratch Card (${SECTION_ID}): Client-side validation failed:`, errors);
+          formErrorDisplay.textContent = errors[0];
+          formErrorDisplay.style.display = 'block';
+          e.preventDefault(); // --- STOP Shopify's submission if validation fails ---
+          return;
+      }
+
+      // --- If validation PASSES ---
+      console.log(`Scratch Card (${SECTION_ID}): Client-side validation passed.`);
+      isSubmitting = true; // Set submitting flag
+      submitButton.disabled = true;
+      submitButton.textContent = 'Submitting...';
+
+      // --- Modify the phone input value *before* allowing submission ---
+      const fullPhoneNumber = `+91${phoneDigits}`;
+      phoneInput.value = fullPhoneNumber; // Set the input value directly
+      console.log(`Scratch Card (${SECTION_ID}): Modified phone input value to: ${phoneInput.value}`);
+
+      // --- Now, let Shopify's default form handler take over ---
+      // We *don't* call e.preventDefault() here if validation passed.
+      // We also *don't* need a manual fetch.
+
+      // --- Trigger Scratch Card Reveal Immediately (Optimistic Approach) ---
+      // Assumes server submission will likely succeed if client validation passed.
+      // This provides immediate feedback to the user.
+      console.log(`Scratch Card (${SECTION_ID}): Triggering scratch reveal optimistically.`);
+      handleFormSuccessVisuals();
+
+    } // End handleValidationAndFormatting
+
+    // --- Visual Changes on Assumed Success ---
+    function handleFormSuccessVisuals() {
+      signupForm.classList.add('sc-fade-out');
+      setTimeout(() => {
+        signupForm.style.display = 'none';
+        scratchContainer.style.display = 'block';
+        scratchContainer.classList.add('sc-slide-down');
+        requestAnimationFrame(() => {
+          if (!scratchCardInstance) {
+            scratchCardInstance = new ScratchCard(canvas, scratchContainer, instruction, arrows, {
+              layerColor: SCRATCH_LAYER_COLOR,
+              onReveal: handleScratchReveal,
+              sectionId: SECTION_ID
+            });
+          }
+          scratchCardInstance.init();
+        });
+      }, 500); // Match animation duration
+    }
+
+    // --- Scratch Card Class (Implementation is required here) ---
+    class ScratchCard {
+        // Copy the full ScratchCard class implementation from the previous correct response here...
+        // ... (constructor, init, resizeCanvas, drawScratchLayer, addEventListeners, removeEventListeners, getPoint, handleStart, handleMove, handleEnd, checkReveal, showInstructions, reveal, autoClearCanvas, destroy) ...
+        constructor(canvasEl, containerEl, instructionEl, arrowsNodeList, options = {}) { this.canvas = canvasEl; this.ctx = this.canvas.getContext('2d', { willReadFrequently: true }); this.container = containerEl; this.instruction = instructionEl; this.arrows = arrowsNodeList; this.sectionId = options.sectionId || 'unknown'; this.config = { scratchPercent: 40, lineWidth: 40, layerColor: options.layerColor || '#CCCCCC', onReveal: options.onReveal || (() => {}), ...options }; this.isDrawing = false; this.lastPoint = { x: 0, y: 0 }; this.isRevealed = false; this.revealTimeout = null; this.resizeObserver = null; this.handleStart = this.handleStart.bind(this); this.handleMove = this.handleMove.bind(this); this.handleEnd = this.handleEnd.bind(this); this.checkReveal = this.checkReveal.bind(this); this.resizeCanvas = this.resizeCanvas.bind(this); }
+        init() { try { this.isRevealed = false; this.isDrawing = false; this.canvas.style.display = 'block'; this.addEventListeners(); this.resizeCanvas(); this.showInstructions(true); } catch(error) { console.error(`Scratch Card (${this.sectionId}) - Error in init:`, error); } }
+        resizeCanvas() { const dpr = window.devicePixelRatio || 1; const rect = this.container.getBoundingClientRect(); if (!rect.width || !rect.height) { return; } this.canvas.width = rect.width * dpr; this.canvas.height = rect.height * dpr; this.canvas.style.width = `${rect.width}px`; this.canvas.style.height = `${rect.height}px`; this.ctx.scale(dpr, dpr); this.drawScratchLayer(); }
+        drawScratchLayer() { this.ctx.save(); this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.globalCompositeOperation = 'source-over'; this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.ctx.fillStyle = this.config.layerColor; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); this.ctx.restore(); this.ctx.globalCompositeOperation = 'destination-out'; this.ctx.strokeStyle = 'rgba(0,0,0,1)'; this.ctx.lineWidth = this.config.lineWidth; this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round'; }
+        addEventListeners() { this.removeEventListeners(); this.canvas.addEventListener('mousedown', this.handleStart, { passive: false }); this.canvas.addEventListener('mousemove', this.handleMove, { passive: false }); document.addEventListener('mouseup', this.handleEnd, { passive: false }); this.canvas.addEventListener('touchstart', this.handleStart, { passive: false }); this.canvas.addEventListener('touchmove', this.handleMove, { passive: false }); this.canvas.addEventListener('touchend', this.handleEnd, { passive: false }); this.canvas.addEventListener('touchcancel', this.handleEnd, { passive: false }); if ('ResizeObserver' in window) { this.resizeObserver = new ResizeObserver(this.resizeCanvas); this.resizeObserver.observe(this.container); } else { window.addEventListener('resize', this.resizeCanvas); } }
+        removeEventListeners() { this.canvas.removeEventListener('mousedown', this.handleStart); this.canvas.removeEventListener('mousemove', this.handleMove); document.removeEventListener('mouseup', this.handleEnd); this.canvas.removeEventListener('touchstart', this.handleStart); this.canvas.removeEventListener('touchmove', this.handleMove); this.canvas.removeEventListener('touchend', this.handleEnd); this.canvas.removeEventListener('touchcancel', this.handleEnd); if (this.resizeObserver) { this.resizeObserver.disconnect(); this.resizeObserver = null; } else { window.removeEventListener('resize', this.resizeCanvas); } }
+        getPoint(e) { e.preventDefault(); const rect = this.canvas.getBoundingClientRect(); const scaleX = (this.canvas.width / (window.devicePixelRatio || 1)) / rect.width; const scaleY = (this.canvas.height / (window.devicePixelRatio || 1)) / rect.height; let clientX, clientY; if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } else { clientX = e.clientX; clientY = e.clientY; } const x = (clientX - rect.left) * scaleX; const y = (clientY - rect.top) * scaleY; return { x, y }; }
+        handleStart(e) { if (this.isRevealed) return; this.isDrawing = true; this.lastPoint = this.getPoint(e); this.showInstructions(false); }
+        handleMove(e) { if (!this.isDrawing || this.isRevealed) return; const currentPoint = this.getPoint(e); this.scratchLine(this.lastPoint, currentPoint); this.lastPoint = currentPoint; requestAnimationFrame(this.checkReveal); }
+        handleEnd(e) { if (!this.isDrawing) return; this.isDrawing = false; requestAnimationFrame(this.checkReveal); }
+        scratchLine(from, to) { this.ctx.beginPath(); this.ctx.moveTo(from.x, from.y); this.ctx.lineTo(to.x, to.y); this.ctx.stroke(); }
+        checkReveal() { if (this.isRevealed || this.isDrawing) return; try { const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height); const pixels = imageData.data; const totalPixels = (this.canvas.width * this.canvas.height) || 1; let transparentPixels = 0; for (let i = 3; i < pixels.length; i += 4) { if (pixels[i] === 0) { transparentPixels++; } } const currentPercent = (transparentPixels / totalPixels) * 100; if (currentPercent >= this.config.scratchPercent) { this.reveal(); } } catch (imgDataError) { console.error(`Scratch Card (${this.sectionId}): Error getting image data:`, imgDataError); } }
+        showInstructions(show) { const opacity = show ? '1' : '0'; if(this.instruction) this.instruction.style.opacity = opacity; if(this.arrows) this.arrows.forEach(arrow => arrow.style.opacity = opacity); }
+        reveal() { if (this.isRevealed) return; this.isRevealed = true; this.isDrawing = false; this.showInstructions(false); console.log(`Scratch Card (${this.sectionId}): Revealed! Triggering callback.`); if (typeof this.config.onReveal === 'function') { this.config.onReveal(); } this.revealTimeout = setTimeout(() => { this.autoClearCanvas(); }, 500); }
+        autoClearCanvas() { console.log(`Scratch Card (${this.sectionId}): Auto-clearing canvas.`); let startTime = null; const duration = 400; const step = (timestamp) => { if (!startTime) startTime = timestamp; const elapsed = timestamp - startTime; const progress = Math.min(elapsed / duration, 1); this.ctx.save(); this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.globalCompositeOperation = 'destination-out'; this.ctx.clearRect(0, 0, this.canvas.width * progress, this.canvas.height); this.ctx.restore(); if (progress < 1) { requestAnimationFrame(step); } else { this.canvas.style.display = 'none'; this.removeEventListeners(); } }; requestAnimationFrame(step); }
+        destroy() { this.removeEventListeners(); clearTimeout(this.revealTimeout); if (this.ctx) { this.ctx.clearRect(0, 0, this.canvas?.width || 0, this.canvas?.height || 0); } console.log(`Scratch Card (${this.sectionId}) destroyed.`); }
+    } // --- End ScratchCard Class ---
+
+    // --- Confetti Logic ---
+    function createConfetti(container) { /* ... Same confetti code ... */ }
+
+    // --- Callback on Reveal ---
+    function handleScratchReveal() { console.log(`Scratch Card (${SECTION_ID}): handleScratchReveal callback executed.`); createConfetti(scratchContainer); }
+
+    // --- Helper Functions ---
+    function setCookie(name, value, days) { /* ... Same cookie code ... */ }
+    function getCookie(name) { /* ... Same cookie code ... */ return null;}
+
+    // --- Theme Editor Integration & Initialization ---
+    function resetPopupState() { /* ... Same reset code ... */ }
+
+    // Initialize
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initPopup); }
+    else { initPopup(); }
+    // Shopify Theme Editor Integration
+    if (Shopify.designMode) { /* ... Same editor code ... */ }
+
+  })();
+  //]]>
+</script>

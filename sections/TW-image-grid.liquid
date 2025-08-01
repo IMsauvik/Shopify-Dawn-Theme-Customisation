@@ -1,0 +1,450 @@
+{% assign products = section.settings.products | reverse | reverse %}
+<style>
+      #shopify-section-{{ section.id }}
+      {
+
+        .tw-container {
+          padding-inline: {{ section.settings.horizontal_padding }}px;
+          padding-block: {{ section.settings.vertical_padding }}px;
+        }
+        .angry-grid {
+          display: -ms-grid;
+          display: grid;
+          gap: 30px;
+          width: 95%;
+          margin-inline: auto;
+          height: 100%;
+          margin-block: 47px;
+        }
+        #item-0 {
+          -ms-grid-row: 2;
+          grid-row-start: 2;
+          -ms-grid-column: 1;
+          grid-column-start: 1;
+          -ms-grid-row-span: 1;
+          grid-row-end: 3;
+          -ms-grid-column-span: 2;
+          grid-column-end: 3;
+        }
+        #item-1 {
+          -ms-grid-row: 1;
+          grid-row-start: 1;
+          -ms-grid-column: 2;
+          grid-column-start: 2;
+          -ms-grid-row-span: 1;
+          grid-row-end: 2;
+          -ms-grid-column-span: 2;
+          grid-column-end: 4;
+        }
+        #item-2 {
+          -ms-grid-row: 2;
+          grid-row-start: 2;
+          -ms-grid-column: 3;
+          grid-column-start: 3;
+          -ms-grid-row-span: 2;
+          grid-row-end: 4;
+          -ms-grid-column-span: 1;
+          grid-column-end: 4;
+        }
+        #item-3 {
+          -ms-grid-row: 3;
+          grid-row-start: 3;
+          -ms-grid-column: 2;
+          grid-column-start: 2;
+          -ms-grid-row-span: 1;
+          grid-row-end: 4;
+          -ms-grid-column-span: 1;
+          grid-column-end: 3;
+        }
+        #item-4 {
+          -ms-grid-row: 3;
+          grid-row-start: 3;
+          -ms-grid-column: 1;
+          grid-column-start: 1;
+          -ms-grid-row-span: 1;
+          grid-row-end: 4;
+          -ms-grid-column-span: 1;
+          grid-column-end: 2;
+        }
+        #item-5 {
+          -ms-grid-row: 1;
+          grid-row-start: 1;
+          -ms-grid-column: 1;
+          grid-column-start: 1;
+          -ms-grid-row-span: 1;
+          grid-row-end: 2;
+          -ms-grid-column-span: 1;
+          grid-column-end: 2;
+        }
+        .dw-item img{
+          width:100%;
+          height:100%;
+          object-fit: cover;
+          object-position: center;
+        }
+        .dw-item {
+          position: relative;
+          overflow: hidden;
+        }
+  .dw-overlay-new {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: -webkit-gradient(linear, left bottom, left top, color-stop(4.47%, rgba(0, 0, 0, 0.5)), color-stop(144.47%, rgba(51, 51, 51, 0.5)));
+    background: -o-linear-gradient(bottom, rgba(0, 0, 0, 0.5) 4.47%, rgba(51, 51, 51, 0.5) 144.47%);
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 4.47%, rgba(51, 51, 51, 0.5) 144.47%);
+    display: none;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+
+
+        @-webkit-keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .dw-overlay-new {
+          display: none;
+          opacity: 0;
+        }
+        .dw-item:hover .dw-overlay-new {
+          display: -webkit-box;
+          display: -ms-flexbox;
+          display: flex;
+          -webkit-animation: fadeIn 0.3s ease forwards;
+          animation: fadeIn 0.3s ease forwards;
+        }
+        .dw-item:hover{
+          cursor:pointer;
+        }
+        .dw-overlay-new p {
+          font-size:20px;
+          font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font.family }};
+          font-weight: 600;
+          line-height: 30px;
+          text-align: left;
+          color:white;
+        }
+        .dw-overlay-new a {
+          text-decoration:none;
+          font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font.family }};
+          font-size:16px;
+          font-weight: 400;
+          line-height: 24px;
+          text-align: left;
+          color:white;
+        }
+       .tw-heading {
+          font-size: {{ section.settings.heading_font_size }}px;
+          font-family: {{ section.settings.custom_heading_font_family |  default : settings.type_header_font.family }};
+          color: {{ section.settings.heading_text_color }};
+         text-align: {{ section.settings.text_alignment }};
+        }
+        .tw-body {
+          font-size: {{ section.settings.body_font_size }}px;
+          font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font.family }};
+          color: {{ section.settings.heading_text_color }};
+          text-align: {{ section.settings.text_alignment }};
+        }
+   @media only screen and (min-width: 769px) {
+     #item-1 img{
+       aspect-ratio:2.75;
+     }
+     #item-0 img{
+       aspect-ratio:2;
+     }
+   }
+        @media only screen and (max-width: 768px) {
+            .tw-heading {
+            font-size: calc({{ section.settings.heading_font_size }}px * 0.75);
+          }
+          .tw-body {
+            font-size: calc({{ section.settings.body_font_size }}px * 0.9);
+          }
+            .dw-heading{
+              font-size: 32px;
+              font-weight: 600;
+              line-height: 35.2px;
+              margin-block: 18px;
+            }
+          .angry-grid {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap:wrap;
+            flex-wrap:wrap;
+            gap: 12px;
+            width: 96%;
+            margin-inline: auto;
+            height: 100%;
+            -webkit-box-pack:center;
+            -ms-flex-pack:center;
+            justify-content:center;
+          }
+          .dw-item{
+            width:45%;
+          }
+          .dw-overlay-new p {
+            font-size: 18px;
+            line-height: 27px;
+            text-align:center;
+          }
+          .dw-overlay-new a {
+            font-size: 14px;
+            line-height: 21px;
+          }
+        }
+  {% if page.template_suffix == "im-eco-page-template" %}
+  .dw-heading{
+          font-family: Aristotelica Display Trial;
+          font-size: 40px;
+          font-weight: 600;
+          line-height: 44px;
+          text-align: center;
+          color: #986835;
+        }
+     @media(max-width: 786px){
+    .dw-heading{
+      font-size: 32px;
+      line-height: 36.2px;
+    }
+    {% endif %}
+   {% if page.template_suffix == "dencrus-landing-page" or request.page_type == "index"  %}
+     .dw-heading{
+      font-family: Montserrat;
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 48.76px;
+      text-align: center;
+       color: #000;
+     }
+      @media(max-width: 786px){
+    .dw-heading{
+      font-size: 22px;
+      line-height: 26.82px;
+    }
+  {% endif %}
+         {% if page.template_suffix == "shaveco-landing-page" %}
+     .dw-heading{
+      font-family: Montserrat;
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 48.76px;
+      text-align: center;
+      color: #517437;
+     }
+      @media(max-width: 786px){
+    .dw-heading{
+      font-size: 22px;
+      line-height: 26.82px;
+    }
+  {% endif %}
+
+  }
+      }
+</style>
+<div class="dw-heading dw-mt">
+  {{ section.settings.heading -}}
+  &nbsp;<span>{{ section.settings.green_heading }}</span>
+</div>
+<p class="dw-sub-heading page-width">{{ section.settings.sub_heading }}</p>
+<div class="angry-grid dw-mb">
+  <div data-number="3" id="item-0" class="dw-item">
+    {% if products[2] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[2].title | truncate: 20 }}</p>
+        <a href="{{ products[2].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_3_mobile | image_url  }}" media="(max-width: 768px)">
+      <source srcset="{{ section.settings.image_3_desktop | image_url  }}">
+      <img src="{{ section.settings.image_3_desktop | image_url  }}" alt="">
+    </picture>
+  </div>
+  <div data-number="2" id="item-1" class="dw-item">
+    {% if products[1] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[1].title | truncate: 20 }}</p>
+        <a href="{{ products[1].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_2_mobile | image_url  }}" media="(max-width: 768px)">
+      <source srcset="{{ section.settings.image_2_desktop | image_url  }}">
+      <img src="{{ section.settings.image_2_desktop | image_url  }}" alt="">
+    </picture>
+  </div>
+  <div data-number="4" id="item-2" class="dw-item">
+    {% if products[3] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[3].title | truncate: 20 }}</p>
+        <a href="{{ products[3].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_4_mobile | image_url  }}" media="(max-width: 768px)">
+      <source srcset="{{ section.settings.image_4_desktop | image_url  }}">
+      <img src="{{ section.settings.image_4_desktop | image_url  }}" alt="">
+    </picture>
+  </div>
+  <div data-number="6" id="item-3" class="dw-item">
+    {% if products[5] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[5].title | truncate: 20 }}</p>
+        <a href="{{ products[5].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_6_mobile | image_url  }}" media="(max-width: 768px)">
+      <source srcset="{{ section.settings.image_6_desktop | image_url  }}">
+      <img src="{{ section.settings.image_6_desktop | image_url  }}" alt="">
+    </picture>
+  </div>
+  <div data-number="5" id="item-4" class="dw-item">
+    {% if products[4] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[4].title | truncate: 20 }}</p>
+        <a href="{{ products[4].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_5_mobile | image_url  }}" media="(max-width: 768px)">
+      <source srcset="{{ section.settings.image_5_desktop | image_url  }}">
+      <img src="{{ section.settings.image_5_desktop | image_url  }}" alt="">
+    </picture>
+  </div>
+  <div data-number="1" id="item-5" class="dw-item">
+    {% if products[0] %}
+      <div class="dw-overlay-new">
+        <p>{{ products[0].title | truncate: 20 }}</p>
+        <a href="{{ products[0].url }}"
+          >View Details<span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span></a
+        >
+      </div>
+    {% endif %}
+    <picture>
+      <source srcset="{{ section.settings.image_1_mobile | image_url  }}" media="(max-width: 718px)">
+      <source srcset="{{ section.settings.image_1_desktop | image_url  }}">
+      <img src="{{ section.settings.image_1_desktop | image_url }}" alt="">
+    </picture>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Image Grid",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "heading"
+    },
+    {
+      "type": "product_list",
+      "label": "Products",
+      "id": "products",
+      "limit": 6
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 1 Desktop",
+      "id": "image_1_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 1 Mobile",
+      "id": "image_1_mobile"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 2 Desktop",
+      "id": "image_2_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 2 Mobile",
+      "id": "image_2_mobile"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 3 Desktop",
+      "id": "image_3_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 3 Mobile",
+      "id": "image_3_mobile"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 4 Desktop",
+      "id": "image_4_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 4 Mobile",
+      "id": "image_4_mobile"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 5 Desktop",
+      "id": "image_5_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 5 Mobile",
+      "id": "image_5_mobile"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 6 Desktop",
+      "id": "image_6_desktop"
+    },
+    {
+      "type": "image_picker",
+      "label": "Image 6 Mobile",
+      "id": "image_6_mobile"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Image Grid"
+    }
+  ]
+}
+{% endschema %}

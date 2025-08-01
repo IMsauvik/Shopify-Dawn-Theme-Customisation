@@ -1,0 +1,289 @@
+{% style %}
+  @media screen and (min-width: 768px) {
+    .pc-only {
+      display: block;
+    }
+    .mobile-only {
+      display: none;
+    }
+    .video-hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      margin-bottom: 0px;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      margin-top: 44px;
+    }
+    .video-background {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -1;
+      filter: blur({{section.settings.blur}}px) opacity({{section.settings.opacity}});
+    }
+  }
+  @media screen and (max-width: 767.98px) {
+    .testimonial-section{
+       padding-top:0px !important;
+    }
+    .pc-only {
+      display: none;
+    }
+    .mobile-only {
+      display: block;
+    }
+    .video-hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      margin-bottom: 0;
+      min-height: {{ section.settings.mobile_video_height }}vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-background {
+      position: relative;
+      min-width: 100%;
+      min-height: 65%;
+      z-index: -1;
+      filter: blur(0px) opacity(1);
+    }
+  }
+  .video-heading {
+    background: transparent !important;
+    color: {{ section.settings.video_heading_color }};
+    font-size: {{ section.settings.heading_font_size }}px;
+    font-weight: {{ section.settings.heading_font_weight }};
+    margin: 0;
+  }
+  .video-text-content {
+    display: block;
+  }
+  .video-text {
+    padding-top: 24px;
+    padding-bottom: 36px;
+    max-width: 600px;
+    color: {{ section.settings.video_text_color }};
+    font-size: {{ section.settings.text_font_size }}px;
+    font-weight: {{ section.settings.text_font_weight }};
+  }
+  .video-button {
+    background: {{ section.settings.button_bg_color }};
+    color: {{ section.settings.button_text_color }};
+    border: 1px solid {{ section.settings.button_border_color }};
+    border-radius: {{ section.settings.button_radius }}px;
+    text-decoration: none;
+    padding: 12px 24px;
+  }
+  .video-button:hover {
+    background: {{ section.settings.button_bg_color_hover }};
+    color: {{ section.settings.button_text_color_hover }};
+    border: 1px solid {{ section.settings.button_border_color_hover }};
+  }
+{% endstyle %}
+
+<div class="video-hero">
+  <div class="video-text-content">
+    {% if section.settings.heading != blank %}
+      <h1 class="video-heading">{{ section.settings.heading }}</h1>
+    {% endif %}
+    {% if section.settings.content_text != blank %}
+      <div class="video-text">{{ section.settings.content_text }}</div>
+    {% endif %}
+    {% if section.settings.link_text != blank %}
+      <a class="video-button" href="{{ section.settings.link_url }}">{{ section.settings.link_text }}</a>
+    {% endif %}
+  </div>
+  <video class="video-background pc-only" autoplay muted loop playsinline>
+    <source src="{{ section.settings.video_url }}" type="video/mp4">
+  </video>
+  <video class="video-background mobile-only" autoplay muted loop playsinline>
+    {% if section.settings.mobile_video_url != blank %}
+      <source src="{{ section.settings.mobile_video_url }}" type="video/mp4">
+    {% else %}
+      <source src="{{ section.settings.video_url }}" type="video/mp4">
+    {% endif %}
+  </video>
+</div>
+
+{% schema %}
+  {
+    "name": "Video Background Banner",
+    "settings": [
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "PC Video URL",
+      "info": "Enter PC video URL"
+    },
+    {
+      "type": "url",
+      "id": "mobile_video_url",
+      "label": "Mobile Video URL",
+      "info": "Enter Mobile video URL"
+    },
+    {
+      "type": "range",
+      "id": "mobile_video_height",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "vh",
+      "label": "Mobile Video Height",
+      "info": "Only works when mobile video URL is not entered",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "color",
+      "id": "video_heading_color",
+      "label": "Heading text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "min": 18,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading font size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "heading_font_weight",
+      "min": 400,
+      "max": 900,
+      "step": 100,
+      "label": "Heading font weight",
+      "default": 600
+    },
+    {
+      "type": "textarea",
+      "id": "content_text",
+      "label": "Content Text"
+    },
+    {
+      "type": "color",
+      "id": "video_text_color",
+      "label": "Content text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading font size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "text_font_weight",
+      "min": 400,
+      "max": 900,
+      "step": 100,
+      "label": "Heading font weight",
+      "default": 600
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Button Text"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Button link page"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button border color",
+      "default": "#000000",
+      "info": "Remove the color code for no border"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "To make the border rounded corners",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color_hover",
+      "label": "Mouse over button background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color_hover",
+      "label": "Mouse over button border color",
+      "default": "#ffffff",
+      "info": "Remove the color code for no border"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color_hover",
+      "label": "Mouse over button text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "blur",
+      "min": 0,
+      "max": 10,
+      "step": 0.1,
+      "unit": "px",
+      "label": "For low quality video add blur",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Change video opacity",
+      "default": 1
+    }
+],
+  "presets": [
+    {
+      "name": "Video Background Banner"
+    }
+  ]
+  }
+{% endschema %}

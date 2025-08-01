@@ -1,0 +1,211 @@
+
+<style>
+  .home-slideshow-banner-3{
+     line-height: 0;
+  }
+    .tw-banner-design3-swiper-container {
+         position: relative;
+    }
+
+    .home-slideshow-banner-3 .swiper-pagination-bullets{
+        position: absolute;
+        z-index: 2;
+        bottom: 5% !important;
+    }
+    .home-slideshow-banner-3  .swiper-pagination-bullet {
+        width: 9px !important;
+        height: 9px !important;
+        background-color:#000 !important;
+        margin: 0 5px;
+        opacity: 0.7;
+        border-radius: 50%;
+        transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+        border: 1px solid #fff!important;
+        }
+
+    .home-slideshow-banner-3 .swiper-pagination-bullet-active {
+       transform: scale(1.4);
+       opacity: 1;
+      }
+
+   .home-slideshow-banner-3 .swiper-pagination {
+         z-index: 2;
+        position: absolute;
+        top: 100% !important;
+      }
+
+             .width-full {
+                width:100%;
+                height:auto;
+             }
+               .tw-banner-design3 {
+                 position: relative;
+               }
+
+               .tw-banner-design3 .swiper-pagination-bullet-active {
+                 background: #000;
+                 border: 1px solid #000!important;
+               }
+
+               .tw-banner-design3-content-container {
+                 position: absolute;
+                 top: 0;
+                 width: 100%;
+                 height: 100%;
+               }
+               .tw-banner-design3-content-wrapper {
+                 display: table;
+                 width: 100%;
+                 height: 100%;
+               }
+               .tw-banner-design3 .swiper-pagination {
+                 bottom: 20px;
+               }
+             .swiper-horizontal>.swiper-pagination-bullets, .swiper-pagination-bullets {
+                text-align: center;
+             }
+            @media (max-width: 650px) {
+              .home-slideshow-banner-3 .swiper-pagination-bullets{
+                bottom:3% !important;
+              }
+            }
+</style>
+
+<section class="home-slideshow-banner-3 animate--slide-in">
+  <div id="tw-banner-{{section.id}}" class="swiper tw-banner-design3-swiper-container">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="tw-banner-design3-each swiper-slide">
+          {% if block.settings.link != blank %}
+            <a href="{{ block.settings.link }}">
+          {% endif %}
+            <picture>
+              {% comment %} Mobile image {% endcomment %}
+              {% if block.settings.slideimgmob != blank %}
+                <source 
+                  media="(max-width:650px)" 
+                  {% if forloop.first %}
+                    srcset="{{ block.settings.slideimgmob | image_url: width: 650 }}"
+                  {% else %}
+                    data-srcset="{{ block.settings.slideimgmob | image_url: width: 650 }}"
+                  {% endif %}
+                >
+              {% endif %}
+              
+              {% comment %} Desktop image - First slide eager, rest lazy {% endcomment %}
+              {% if block.settings.slideimg != blank %}
+                <img 
+                  class="width-full{% unless forloop.first %} lazy{% endunless %}" 
+                  {% if forloop.first %}
+                    src="{{ block.settings.slideimg | image_url: width: 1400 }}"
+                    fetchpriority="high"
+                  {% else %}
+                    data-src="{{ block.settings.slideimg | image_url: width: 1400 }}"
+                  {% endif %}
+                  alt="{{ block.settings.slideimg.alt | default: 'Banner slide ' | append: forloop.index }}"
+                  width="{{ block.settings.slideimg.width | default: 1400 }}"
+                  height="{{ block.settings.slideimg.height | default: 600 }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  decoding="async"
+                >
+              {% else %}
+                {% comment %} Fallback placeholder if no image is selected {% endcomment %}
+                <div style="width:100%;height:400px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#666;">
+                  <span>Add banner image</span>
+                </div>
+              {% endif %}
+            </picture>
+          {% if block.settings.link != blank %}
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    
+    <div id="tw-banner-{{section.id}}-pagination"></div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var autoplayEnabled = {{ section.settings.check_to_auto_slides }};
+    var timeInterval = {{ section.settings.time_interval }} * 1000;
+
+    var twBannerDesign3 = new Swiper('#tw-banner-{{section.id}}', {
+      slidesPerView: 1,
+      loop: true,
+      spaceBetween: 30,
+      autoplay: autoplayEnabled ? { delay: timeInterval, disableOnInteraction: true } : false,
+      pagination: {
+        el: '#tw-banner-{{section.id}}-pagination',
+        clickable: true,
+      },
+      on: {
+        init: function () {
+          if (window.lazyLoadInstance) {
+            window.lazyLoadInstance.update();
+          }
+        },
+        slideChange: function () {
+          if (window.lazyLoadInstance) {
+            window.lazyLoadInstance.update();
+          }
+        }
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Banner Slider",
+  "settings": [
+     {
+      "type": "checkbox",
+      "label": "Check to Auto Slides",
+      "id": "check_to_auto_slides",
+      "default": true
+    },
+     {
+      "type": "range",
+      "label": "Time Interval",
+      "id": "time_interval",
+      "default": 2,
+      "min": 1,
+      "max": 10,
+      "step": 1
+    }
+
+  ],
+
+  "blocks": [
+    {
+      "name": "Slide",
+      "type": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "slideimg",
+          "label": "Image desktop"
+        },
+        {
+          "type": "image_picker",
+          "id": "slideimgmob",
+          "label": "Image mobile"
+        },
+
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner Slider"
+    }
+  ]
+}
+{% endschema %}

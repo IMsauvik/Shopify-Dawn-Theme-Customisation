@@ -1,0 +1,58 @@
+
+<style>
+  
+
+.collection-banner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.collection-banner__image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+  #collectionbanner-8 img {
+  padding-bottom: 30px;
+  }
+
+  @media(max-width:768px){
+      #collectionbanner-8 img {
+  padding-bottom: 20px;
+  }
+  }
+</style>
+<section id="collectionbanner-{{ section.index }}" class="collection-banner">
+  {% if section.settings.add_desktop_image != blank or section.settings.add_mobile_image != blank %}
+    <picture style="width:100%;">
+      {% if section.settings.add_mobile_image != blank %}
+        <source media="(max-width: 768px)" srcset="{{ section.settings.add_mobile_image | img_url: '750x' }}">
+      {% endif %}
+      {% if section.settings.add_desktop_image != blank %}
+        <img src="{{ section.settings.add_desktop_image | img_url: '1920x' }}" alt="Collection Banner" class="collection-banner__image">
+      {% endif %}
+    </picture>
+  {% endif %}
+</section>
+{% schema %}
+{
+  "name": "Collection Banner New",
+  "settings": [
+    {
+      "type": "image_picker",
+      "label": "Add Desktop Image",
+      "id": "add_desktop_image"
+    },
+    {
+      "type": "image_picker",
+      "label": "Add Mobile Image",
+      "id": "add_mobile_image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Banner New"
+    }
+  ]
+}
+{% endschema %}

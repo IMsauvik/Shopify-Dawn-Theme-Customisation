@@ -1,0 +1,53 @@
+
+
+
+
+<style>
+  .collection-banner-container {
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  .collection-banner-picture {
+    width: 100%;
+    display: block;
+  }
+  
+  .collection-banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>
+  
+  {% if collection.metafields.custom.add_desktop_banner != blank or collection.metafields.custom.add_mobile_image != blank %}
+  <div class="collection-banner-container">
+    <picture class="collection-banner-picture">
+      {% if collection.metafields.custom.add_mobile_image != blank %}
+        <source media="(max-width: 768px)" srcset="{{ collection.metafields.custom.add_mobile_image | img_url: 'master' }}">
+      {% endif %}
+      
+      {% if collection.metafields.custom.add_desktop_banner != blank %}
+        <source media="(min-width: 769px)" srcset="{{ collection.metafields.custom.add_desktop_banner | img_url: 'master' }}">
+        <img src="{{ collection.metafields.custom.add_desktop_banner | img_url: 'master' }}" alt="{{ collection.title | escape }}" class="collection-banner-img">
+      {% elsif collection.metafields.custom.add_mobile_image != blank %}
+        <img src="{{ collection.metafields.custom.add_mobile_image | img_url: 'master' }}" alt="{{ collection.title | escape }}" class="collection-banner-img">
+      {% endif %}
+    </picture>
+  </div>
+{% endif %}
+
+
+
+{% schema %}
+{
+  "name": "Collection Banner Main",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Collection Banner Main"
+    }
+  ]
+}
+{% endschema %}

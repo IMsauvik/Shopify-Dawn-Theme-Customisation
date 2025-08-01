@@ -1,0 +1,139 @@
+<style>
+        .certification-container {
+          overflow: hidden; /* Hide any overflow content */
+          position: relative;
+        }
+
+        .certification-slides {
+          display: flex;
+          justify-content: center;
+          flex-wrap: nowrap;
+          gap: 51px;
+        }
+
+        .certification-slide img {
+          max-width: 93px;
+          height: auto;
+          object-fit: contain;
+          padding-top: 27px;
+        }
+
+        @media only screen and (max-width: 768px) {
+          .certification-slides {
+            display: flex;
+            justify-content: initial;
+            gap: 30px;
+            overflow: hidden; /* Prevent overflow */
+          }
+
+          .certification-slide {
+            min-width: 25%; /* Four images per view */
+          }
+
+          .certification-slide img {
+            max-width: 80px; /* Smaller size on mobile */
+          }
+        }
+         .dw-heading-special {
+          font-size: 30px;
+          font-weight: 600;
+          line-height: normal;
+          text-align: center;
+          color: #000;
+          margin-bottom: 4px;
+          margin-top: 24px;
+      }
+            @media(max-width: 786px){
+            .dw-heading-special {
+                font-size: 20px;
+                font-weight: 600;
+                line-height: normal;
+            }
+              .certification-slide img {
+        padding-top: 6px;
+    }
+          }
+
+</style>
+
+<section class="certification-section">
+  <div class="certification-container">
+    <div class="certification-slides" id="certification-slides">
+      {% for block in section.blocks %}
+        <div class="certification-slide">
+          <img src="{{ block.settings.upload_your_image_here | img_url: '600x' }}" alt="Certification Image">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slidesContainer = document.querySelector('.certification-slides');
+    const speed = 1; // Adjust speed of scrolling
+
+    // Function to duplicate slides for infinite scroll on mobile
+    function duplicateSlidesForMobile() {
+      if (window.innerWidth <= 768) { // Only on mobile screens
+        const originalSlides = slidesContainer.innerHTML;
+        slidesContainer.innerHTML += originalSlides; // Duplicate slides for infinite scrolling
+      }
+    }
+
+    // Function to start infinite scroll on mobile
+    function startInfiniteScroll() {
+      if (window.innerWidth <= 768) { // Only on mobile screens
+        function scrollSlides() {
+          slidesContainer.scrollLeft += speed;
+          // If the scroll reaches the end of the first set of slides, reset to the beginning
+          if (slidesContainer.scrollLeft >= slidesContainer.scrollWidth / 2) {
+            slidesContainer.scrollLeft = 0;
+          }
+        }
+        setInterval(scrollSlides, 20); // Adjust the interval for smooth scrolling
+      }
+    }
+
+    // Initial check when the page loads
+    duplicateSlidesForMobile();
+    startInfiniteScroll();
+
+    // Optional: Handle screen resize
+    window.addEventListener('resize', function() {
+      if (window.innerWidth <= 768) {
+        // Ensure slides aren't duplicated multiple times
+        if (slidesContainer.innerHTML.split('</div>').length <= section.blocks.length * 2) {
+          duplicateSlidesForMobile();
+        }
+        startInfiniteScroll();
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Certification Section",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "add_slide",
+      "name": "Add Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Upload your image here",
+          "id": "upload_your_image_here"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Certification Section"
+    }
+  ]
+}
+{% endschema %}

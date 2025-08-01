@@ -1,0 +1,354 @@
+<style>
+            .social-handle {
+              margin: 0;
+              color: #fff;
+              font-size: 12px;
+              font-weight: 900;
+              letter-spacing: 0;
+            }
+
+            .testimonial-section {
+              padding-block: 2rem;
+              overflow: hidden; /* Hide overflow for smooth scrolling */
+              position: relative; /* Positioning for absolute children */
+              padding-top:0;
+            }
+
+            .testimonial-section h2 {
+              text-align: center;
+              margin-bottom: 2rem;
+            }
+
+            .testimonial-container {
+              display: flex;
+              align-items: center;
+              width: max-content; /* Width to accommodate all testimonials */
+              animation: marquee 20s linear infinite; /* Continuous scrolling */
+              transition: animation-play-state 0.5s ease; /* Smooth transition for play state */
+            }
+
+            .testimonial-wrapper {
+              display: flex; /* Arrange cards in a row */
+            }
+
+            .testimonial-card {
+              background: #1a1a1a;
+              padding: 2.5rem;
+              border-radius: 10px;
+              margin: 8px;
+              flex-shrink: 0; /* Prevent cards from shrinking */
+              width: 300px; /* Set a fixed width for each card */
+              transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth scaling and shadow */
+            }
+
+            .testimonial-card:hover {
+              transform: scale(1.03);
+              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .profile-image {
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+
+            .testimonial-header {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 1rem;
+            }
+
+            .name-social {
+              flex-grow: 1;
+              margin-left: 1rem;
+            }
+
+            .name-social h3 {
+              margin: 0;
+              font-size: 17px;
+              font-weight: 900;
+              color: #ffff;
+            }
+
+            .name-social .social-handle a {
+              color: #517fa4;
+              text-decoration: none;
+            }
+
+            .insta-logo img {
+              width: 35px;
+            }
+
+            .testimonial-content {
+              text-align: left;
+            }
+
+            .testimonial-content p {
+              margin-bottom: 1rem;
+              color: #fff;
+              font-size: 16px;
+              line-height: normal;
+              letter-spacing: 0;
+              font-weight: 400;
+            }
+            .testimonial-content a{
+               color:inherit;
+            }
+
+            .product-image {
+              width: 100%;
+              height: auto;
+              display: block;
+              border-radius:8px;
+            }
+
+            @keyframes marquee {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+
+            .testimonial-container:hover {
+              animation-play-state: paused;
+            }
+
+            @media(max-width:768px){
+               .testimonial-card {
+                padding: 2rem;
+               }
+              .testimonial-content p {
+              margin-bottom: 1rem;
+              color: #fff;
+              font-size: 13px;
+              line-height: normal;
+              letter-spacing: 0;
+              font-weight: 400;
+          }
+              .product-image{
+                 max-height:200px;
+              }
+              .name-social h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 900;
+            color: #ffff;
+        }
+              .social-handle {
+          margin: 0;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0;
+      }
+          .insta-logo img {
+        width: 29px;
+    }
+
+            }
+    .testimonial-container {
+    display: flex;
+    align-items: center;
+    width: max-content; /* Ensures the width adjusts to content */
+    animation: marquee 40s linear infinite; /* Adjust timing based on total width */
+    transition: animation-play-state 0.5s ease; /* Smooth transition for play state */
+  }
+   
+</style>
+
+<div class="testimonial-section page-width">
+  <h2 class="dw-heading-special">{{ section.settings.add_heading }}</h2>
+
+  <div class="testimonial-container">
+    <div class="testimonial-wrapper">
+      {%- for block in section.blocks -%}
+        <div class="testimonial-card">
+          <!-- Profile Image -->
+          <div class="testimonial-header">
+            <img
+              src="{{ block.settings.add_profile_image | image_url }}"
+              alt="{{ block.settings.add_name }}"
+              class="profile-image"
+            >
+
+            <!-- Name and Social Media -->
+            <div class="name-social">
+              <h3>{{ block.settings.add_name }}</h3>
+              <p class="social-handle">
+                {{ block.settings.add_social_media_handle }}
+              </p>
+            </div>
+
+            <!-- Instagram Logo -->
+            <div class="insta-logo">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/instagram-white-icon.webp?v=1727435622"
+                alt="Instagram"
+              >
+            </div>
+          </div>
+
+          <!-- Testimonial Text -->
+          <div class="testimonial-content">
+            <p>{{ block.settings.add_paragraph_text }}</p>
+            <!-- Product Image -->
+            <img src="{{ block.settings.add_product_image | image_url }}" alt="Product Image" class="product-image">
+          </div>
+        </div>
+      {%- endfor -%}
+      <!-- Duplicate Testimonials for Infinite Scroll -->
+      {%- for block in section.blocks -%}
+        <div class="testimonial-card">
+          <!-- Profile Image -->
+          <div class="testimonial-header">
+            <img
+              src="{{ block.settings.add_profile_image | image_url }}"
+              alt="{{ block.settings.add_name }}"
+              class="profile-image"
+            >
+
+            <!-- Name and Social Media -->
+            <div class="name-social">
+              <h3>{{ block.settings.add_name }}</h3>
+              <p class="social-handle">
+                {{ block.settings.add_social_media_handle }}
+              </p>
+            </div>
+
+            <!-- Instagram Logo -->
+            <div class="insta-logo">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/instagram-white-icon.webp?v=1727435622"
+                alt="Instagram"
+              >
+            </div>
+          </div>
+
+          <!-- Testimonial Text -->
+          <div class="testimonial-content">
+            <p>{{ block.settings.add_paragraph_text }}</p>
+            <!-- Product Image -->
+            <img src="{{ block.settings.add_product_image | image_url }}" alt="Product Image" class="product-image">
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const testimonialContainer = document.querySelector('.testimonial-container');
+    let isHolding = false;
+    let startX = 0;
+    let startY = 0;
+    let scrollLeft = 0;
+    let isHorizontalScroll = false;
+
+    // Pause animation on touch start
+    testimonialContainer.addEventListener('touchstart', (e) => {
+      isHolding = true;
+      testimonialContainer.style.animationPlayState = 'paused';
+      startX = e.touches[0].clientX; // Get initial X position
+      startY = e.touches[0].clientY; // Get initial Y position
+      scrollLeft = testimonialContainer.scrollLeft;
+    });
+
+    // Handle touch move
+    testimonialContainer.addEventListener('touchmove', (e) => {
+      if (!isHolding) return;
+      const x = e.touches[0].clientX; // Current X position
+      const y = e.touches[0].clientY; // Current Y position
+      const deltaX = x - startX;
+      const deltaY = y - startY;
+
+      // Check if the swipe is mostly horizontal or vertical
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal scroll
+        e.preventDefault(); // Prevent vertical scrolling
+        testimonialContainer.scrollLeft = scrollLeft - deltaX * 2; // Scroll horizontally
+        isHorizontalScroll = true;
+      } else {
+        // Vertical scroll, do not prevent default behavior
+        isHorizontalScroll = false;
+      }
+    });
+
+    // Resume animation on touch end
+    testimonialContainer.addEventListener('touchend', () => {
+      if (isHolding && !isHorizontalScroll) {
+        testimonialContainer.style.animationPlayState = 'running';
+      }
+      isHolding = false;
+      isHorizontalScroll = false;
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Customer Testimonial",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Add Heading",
+      "id": "add_heading",
+      "placeholder": "Add heading text here"
+    },
+    {
+      "type": "checkbox",
+      "label": "Enable Autoplay",
+      "id": "enable_autoplay",
+      "default": true
+    },
+    {
+      "type": "number",
+      "label": "Autoplay Speed (ms)",
+      "id": "autoplay_speed",
+      "default": 3000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "add_slide",
+      "name": "Add Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Add Profile Image",
+          "id": "add_profile_image"
+        },
+        {
+          "type": "text",
+          "label": "Add Name",
+          "id": "add_name"
+        },
+        {
+          "type": "text",
+          "label": "Add Social Media Handle",
+          "id": "add_social_media_handle"
+        },
+        {
+          "type": "richtext",
+          "label": "Add Paragraph Text",
+          "id": "add_paragraph_text"
+        },
+        {
+          "type": "image_picker",
+          "label": "Add Product Image",
+          "id": "add_product_image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Testimonial"
+    }
+  ]
+}
+{% endschema %}

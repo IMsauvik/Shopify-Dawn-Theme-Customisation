@@ -1,0 +1,321 @@
+
+
+<style>
+
+.spin-wheel-container {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 20px;
+}
+
+.spin-wheel-email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.spin-wheel-email-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.spin-wheel-submit-btn {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#spin-wheel-canvas {
+  max-width: 100%;
+  margin: 0 auto;
+  display: none;
+}
+
+.spin-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: none;
+}
+
+.wheel-result-container {
+  display: none;
+  margin-top: 20px;
+  perspective: 1000px;
+}
+
+.wheel-result-card {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  transform-style: preserve-3d;
+  transform: rotateY(180deg);
+  transition: transform 0.6s;
+  backface-visibility: hidden;
+}
+
+.wheel-result-card.flipped {
+  transform: rotateY(0);
+}
+
+.wheel-result-code {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.copy-code-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+
+<div class="spin-wheel-container">
+  <h2>{{ section.settings.popup_title }}</h2>
+  <p>{{ section.settings.popup_subtitle }}</p>
+
+  <form class="spin-wheel-email-form" id="spin-wheel-email-form">
+    <input 
+      type="email" 
+      class="spin-wheel-email-input" 
+      placeholder="Enter your email" 
+      required
+    >
+    <button type="submit" class="spin-wheel-submit-btn">
+      Submit
+    </button>
+  </form>
+
+  <canvas id="spin-wheel-canvas" width="300" height="300"></canvas>
+
+  <button id="spin-wheel-btn" class="spin-button">
+    Spin the Wheel
+  </button>
+
+  <div class="wheel-result-container">
+    <div class="wheel-result-card">
+      <h3 id="wheel-result-label"></h3>
+      <div class="wheel-result-code" id="wheel-result-code"></div>
+      <button class="copy-code-btn" id="copy-wheel-code-btn">
+        Copy Code
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Wheel Segments Configuration
+  const wheelSegments = [
+    {% for block in section.blocks %}
+    {
+      label: '{{ block.settings.segment_label }}',
+      code: '{{ block.settings.segment_code }}',
+      color: '{{ block.settings.segment_color }}'
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ];
+
+  // Elements
+  const emailForm = document.getElementById('spin-wheel-email-form');
+  const canvas = document.getElementById('spin-wheel-canvas');
+  const spinButton = document.getElementById('spin-wheel-btn');
+  const wheelResultContainer = document.querySelector('.wheel-result-container');
+  const wheelResultCard = document.querySelector('.wheel-result-card');
+  const wheelResultLabel = document.getElementById('wheel-result-label');
+  const wheelResultCode = document.getElementById('wheel-result-code');
+  const copyCodeBtn = document.getElementById('copy-wheel-code-btn');
+
+  // Email Form Submission
+  emailForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Simulate email submission (replace with actual newsletter signup logic)
+    const email = this.querySelector('input[type="email"]').value;
+    
+    // Hide email form
+    emailForm.style.display = 'none';
+    
+    // Show wheel canvas and spin button
+    canvas.style.display = 'block';
+    spinButton.style.display = 'block';
+    
+    // Create wheel
+    createWheel();
+  });
+
+  // Wheel Creation
+  function createWheel() {
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(canvas.width, canvas.height) / 2 - 10;
+
+    // Clear previous drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw wheel segments
+    const totalSegments = wheelSegments.length;
+    const anglePerSegment = (Math.PI * 2) / totalSegments;
+
+    wheelSegments.forEach((segment, index) => {
+      const startAngle = index * anglePerSegment;
+      const endAngle = (index + 1) * anglePerSegment;
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.closePath();
+
+      // Fill segment
+      ctx.fillStyle = segment.color;
+      ctx.fill();
+
+      // Add segment labels
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(startAngle + anglePerSegment / 2);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(segment.label, radius * 0.7, 0);
+      ctx.restore();
+    });
+
+    // Add wheel border
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '{{ section.settings.wheel_border_color }}';
+    ctx.stroke();
+  }
+
+  // Spin the Wheel
+  spinButton.addEventListener('click', function() {
+    // Disable spin button during spin
+    this.disabled = true;
+
+    // Select a random segment
+    const selectedSegmentIndex = Math.floor(Math.random() * wheelSegments.length);
+    const selectedSegment = wheelSegments[selectedSegmentIndex];
+
+    // Random spin duration between 5-7 seconds
+    const spinDuration = Math.random() * 2000 + 5000; // 5-7 seconds
+    const totalRotation = (Math.PI * 2 * 3) + // 3 full rotations 
+      (selectedSegmentIndex * (Math.PI * 2 / wheelSegments.length)); // Precise stop
+
+    // Animate wheel spin
+    gsap.to(canvas, {
+      rotation: totalRotation,
+      duration: spinDuration / 1000,
+      ease: 'power1.inOut',
+      transformOrigin: 'center center',
+      onComplete: () => {
+        // Show result
+        showWheelResult(selectedSegment);
+      }
+    });
+  });
+
+  // Show Wheel Result
+  function showWheelResult(segment) {
+    // Update result details
+    wheelResultLabel.textContent = segment.label;
+    wheelResultCode.textContent = segment.code;
+
+    // Show and flip result card
+    wheelResultContainer.style.display = 'block';
+    setTimeout(() => {
+      wheelResultCard.classList.add('flipped');
+    }, 100);
+  }
+
+  // Copy Coupon Code
+  copyCodeBtn.addEventListener('click', function() {
+    const code = wheelResultCode.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      alert('Coupon code copied!');
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Spin Wheel Popup",
+  "settings": [
+    {
+      "type": "text",
+      "id": "popup_title",
+      "label": "Popup Title",
+      "default": "Spin to Win!"
+    },
+    {
+      "type": "text",
+      "id": "popup_subtitle",
+      "label": "Popup Subtitle",
+      "default": "Enter your email for a chance to win"
+    },
+    {
+      "type": "color",
+      "id": "wheel_background_color",
+      "label": "Wheel Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "wheel_border_color",
+      "label": "Wheel Border Color",
+      "default": "#000000"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "wheel_segment",
+      "name": "Wheel Segment",
+      "settings": [
+        {
+          "type": "text",
+          "id": "segment_label",
+          "label": "Segment Label",
+          "default": "20% OFF"
+        },
+        {
+          "type": "text",
+          "id": "segment_code",
+          "label": "Coupon Code",
+          "default": "SPIN20"
+        },
+        {
+          "type": "color",
+          "id": "segment_color",
+          "label": "Segment Color",
+          "default": "#FF6B6B"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Interactive Spin Wheel"
+    }
+  ]
+}
+{% endschema %}

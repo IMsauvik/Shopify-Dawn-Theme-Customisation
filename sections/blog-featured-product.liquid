@@ -1,0 +1,279 @@
+
+{%- liquid
+  assign product = article.metafields.custom.add_product.value
+  assign has_product = product
+  assign current_variant = product.first_available_variant | default: product.variants.first
+-%}
+
+{%- if has_product -%}
+  <div
+    id="FeaturedProductSection-{{ section.id }}"
+    class="page-width page-width page-width--narrow scroll-trigger animate--fade-in scroll-trigger animate--fade-in featured-blog-product featured-blog-product--{{ section.id }}"
+    data-section-id="{{ section.id }}"
+    >
+    {% comment %} The extra <div class="page-width"> that was here has been REMOVED. This is the main fix. {% endcomment %}
+    <div class="product-grid">
+      
+      <div class="product-grid__gallery">
+        <div class="product-gallery">
+          <div class="swiper product-gallery__main">
+            <div class="swiper-wrapper">
+              {%- for image in product.images -%}
+                <div class="swiper-slide" data-image-id="{{ image.id }}">
+                  <div class="product-gallery__image-container">
+                    <img src="{{ image | image_url: width: 1200 }}" alt="{{ image.alt | escape }}" loading="lazy" width="{{ image.width }}" height="{{ image.height }}">
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+          </div>
+
+          {% if product.images.size > 1 %}
+            <div class="swiper product-gallery__thumbs">
+              <div class="swiper-wrapper">
+                {%- for image in product.images -%}
+                  <div class="swiper-slide">
+                    <div class="product-gallery__thumb-container">
+                      <img src="{{ image | image_url: width: 200 }}" alt="{{ image.alt | escape }}" loading="lazy" width="{{ image.width }}" height="{{ image.height }}">
+                    </div>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="product-grid__info">
+        <div class="product-info">
+          {%- if section.settings.show_vendor and product.vendor != blank -%}
+            <p class="product-info__vendor">{{ product.vendor }}</p>
+          {%- endif -%}
+
+          <h1 class="product-info__title">{{ product.title }}</h1>
+          <div 
+            class="product-info__price"
+            {% if current_variant.compare_at_price > current_variant.price %}data-on-sale="true"{% endif %}
+          >
+            <span class="price-item price-item--sale">
+              {{ current_variant.price | money }}
+            </span>
+            <span class="price-item price-item--compare">
+              {{ current_variant.compare_at_price | money }}
+            </span>
+          </div>
+          
+          {%- unless product.has_only_default_variant -%}
+            <div class="variant-selector-container">
+              {%- for option in product.options_with_values -%}
+                <fieldset class="variant-fieldset">
+                  <legend class="variant-fieldset__legend">{{ option.name }}</legend>
+                  {%- for value in option.values -%}
+                    <div class="variant-input">
+                      <input type="radio" 
+                             id="option-{{ section.id }}-{{ option.position }}-{{ forloop.index }}"
+                             name="option-{{ option.position }}" 
+                             value="{{ value | escape }}"
+                             {% if option.selected_value == value %}checked{% endif %}>
+                      <label for="option-{{ section.id }}-{{ option.position }}-{{ forloop.index }}">{{ value }}</label>
+                    </div>
+                  {%- endfor -%}
+                </fieldset>
+              {%- endfor -%}
+              
+              <script type="application/json" class="product-variants-data">
+                [
+                  {%- for variant in product.variants -%}
+                    {
+                      "id": {{ variant.id }}, "available": {{ variant.available }},
+                      "price": {{ variant.price }}, "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+                      "formatted_price": "{{ variant.price | money }}", "formatted_compare_at_price": "{{ variant.compare_at_price | money }}",
+                      "options": {{ variant.options | json }}, "featured_image": { "id": {{ variant.featured_image.id | default: 'null' }} }
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+            </div>
+          {%- endunless -%}
+
+          <div class="product-form">
+            <form method="post" action="/cart/add" accept-charset="UTF-8" enctype="multipart/form-data">
+              <input type="hidden" name="id" value="{{ current_variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" name="add" class="product-form__add-button" {% if current_variant.available == false %}disabled{% endif %}>
+                  <span class="add-to-cart-text">
+                    {%- if current_variant.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+                  </span>
+              </button>
+            </form>
+          </div>
+           
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+
+<script>
+  class VariantSelector {
+    constructor(container) {
+      this.container = container;
+      this.section = this.container.closest('[data-section-id]');
+      this.variants = JSON.parse(this.container.querySelector('.product-variants-data').textContent);
+      this.container.addEventListener('change', this.onVariantChange.bind(this));
+    }
+    onVariantChange() {
+      const currentVariant = this.getCurrentVariant();
+      this.updateForm(currentVariant);
+      this.updatePrice(currentVariant);
+      this.updateFeaturedImage(currentVariant);
+    }
+    getCurrentVariant() {
+      const selectedOptions = Array.from(this.container.querySelectorAll('input[type="radio"]:checked')).map(input => input.value);
+      return this.variants.find(variant => !variant.options.map((option, index) => selectedOptions[index] === option).includes(false));
+    }
+    updateForm(variant) {
+      const form = this.section.querySelector('.product-form form');
+      if (!form) return;
+      const addButton = form.querySelector('button[name="add"]');
+      const addButtonText = addButton.querySelector('.add-to-cart-text');
+      const hiddenInput = form.querySelector('input[name="id"]');
+      if (!variant) {
+        addButton.setAttribute('disabled', true);
+        addButtonText.textContent = 'Unavailable';
+        hiddenInput.value = '';
+      } else {
+        hiddenInput.value = variant.id;
+        if (variant.available) {
+          addButton.removeAttribute('disabled');
+          addButtonText.textContent = 'Add to Cart';
+        } else {
+          addButton.setAttribute('disabled', true);
+          addButtonText.textContent = 'Sold Out';
+        }
+      }
+    }
+    updatePrice(variant) {
+      const priceContainer = this.section.querySelector('.product-info__price');
+      if (!priceContainer || !variant) return;
+      const salePriceEl = priceContainer.querySelector('.price-item--sale');
+      const comparePriceEl = priceContainer.querySelector('.price-item--compare');
+      if (variant.compare_at_price > variant.price) {
+        priceContainer.dataset.onSale = 'true';
+        salePriceEl.textContent = variant.formatted_price;
+        comparePriceEl.textContent = variant.formatted_compare_at_price;
+      } else {
+        priceContainer.dataset.onSale = 'false';
+        salePriceEl.textContent = variant.formatted_price;
+      }
+    }
+    updateFeaturedImage(variant) {
+      if (!variant || !variant.featured_image) return;
+      const mainSwiper = this.section.swiper;
+      if (!mainSwiper) return;
+      const imageId = variant.featured_image.id;
+      const targetSlide = this.section.querySelector(`.swiper-slide[data-image-id="${imageId}"]`);
+      if (targetSlide) {
+        const slideIndex = Array.from(targetSlide.parentElement.children).indexOf(targetSlide);
+        if (slideIndex > -1) mainSwiper.slideTo(slideIndex, 0);
+      }
+    }
+  }
+
+  function initFeaturedProductSection(section) {
+    const mainGalleryEl = section.querySelector('.product-gallery__main');
+    if (!mainGalleryEl) return;
+    let thumbsSwiper = null;
+    const thumbGalleryEl = section.querySelector('.product-gallery__thumbs');
+    if (thumbGalleryEl) {
+      thumbsSwiper = new Swiper(thumbGalleryEl, {
+        spaceBetween: 10,
+        slidesPerView: 3.5,
+        freeMode: true,
+        watchSlidesProgress: true,
+        breakpoints: {
+          768: { slidesPerView: 4, spaceBetween: 10 }
+        }
+      });
+    }
+    const nextButton = section.querySelector('.swiper-button-next');
+    const prevButton = section.querySelector('.swiper-button-prev');
+    const mainSwiper = new Swiper(mainGalleryEl, {
+      spaceBetween: 10,
+      navigation: { nextEl: nextButton, prevEl: prevButton },
+      thumbs: { swiper: thumbsSwiper },
+    });
+    section.swiper = mainSwiper;
+    const variantContainer = section.querySelector('.variant-selector-container');
+    if (variantContainer) {
+      new VariantSelector(variantContainer);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const sectionId = '{{ section.id }}';
+    const sectionElement = document.getElementById(`FeaturedProductSection-${sectionId}`);
+    if (sectionElement) {
+      initFeaturedProductSection(sectionElement);
+    }
+  });
+</script>
+
+{%- style -%}
+  .featured-blog-product--{{ section.id }} {  }
+  .featured-blog-product--{{ section.id }} .product-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+  @media (min-width: 768px) { .featured-blog-product--{{ section.id }} .product-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 4rem; align-items: flex-start; } }
+  
+  /* START MOBILE FIX: Add overflow: hidden to the gallery container */
+  .featured-blog-product--{{ section.id }} .product-gallery { overflow: hidden; }
+  /* END MOBILE FIX */
+
+  .featured-blog-product--{{ section.id }} .product-gallery__main { margin-bottom: 10px; border: 1px solid #e5e5e5; }
+  .featured-blog-product--{{ section.id }} .product-gallery__image-container { position: relative; padding-top: 100%; }
+  .featured-blog-product--{{ section.id }} .product-gallery__image-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+  .featured-blog-product--{{ section.id }} .product-gallery__thumbs .swiper-slide { opacity: 0.6; cursor: pointer; transition: opacity 0.3s; border: 2px solid transparent; }
+  .featured-blog-product--{{ section.id }} .product-gallery__thumbs .swiper-slide:hover { opacity: 1; }
+  .featured-blog-product--{{ section.id }} .product-gallery__thumbs .swiper-slide-thumb-active { opacity: 1; border-color: #000; }
+  .featured-blog-product--{{ section.id }} .product-gallery__thumb-container img { display: block; width: 100%; height: auto; }
+  .featured-blog-product--{{ section.id }} .swiper-button-next, .featured-blog-product--{{ section.id }} .swiper-button-prev { color: #000; }
+  .featured-blog-product--{{ section.id }} .product-info__vendor { font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; color: #666; }
+  .featured-blog-product--{{ section.id }} .product-info__title { font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 1rem; line-height: 1.2; }
+  .featured-blog-product--{{ section.id }} .product-info__price { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 1.5rem; margin-bottom: 1.5rem; }
+  .featured-blog-product--{{ section.id }} .price-item--compare { display: none; text-decoration: line-through; color: #777; font-size: 1.2rem; }
+  .featured-blog-product--{{ section.id }} .product-info__price[data-on-sale="true"] .price-item--compare { display: inline-block; }
+  .featured-blog-product--{{ section.id }} .product-info__price[data-on-sale="true"] .price-item--sale { color: #d94d4d; }
+  .featured-blog-product--{{ section.id }} .variant-fieldset { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; border: none; padding: 0; margin: 0 0 1.5rem; }
+  .featured-blog-product--{{ section.id }} .variant-fieldset__legend { font-weight: bold; margin-right: 0.5rem; }
+  .featured-blog-product--{{ section.id }} .variant-input { margin: 0; }
+  .featured-blog-product--{{ section.id }} .variant-input input[type="radio"] { clip: rect(0,0,0,0); position: absolute; }
+  .featured-blog-product--{{ section.id }} .variant-input label { display: block; padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+  .featured-blog-product--{{ section.id }} .variant-input input[type="radio"]:checked + label { border-color: #000; background-color: #000; color: #fff; }
+  .featured-blog-product--{{ section.id }} .product-form__add-button { width: 100%; padding: 1rem; font-size: 1.6rem; background-color: #1a1b18; color: white; border: none; cursor: pointer; transition: background-color 0.3s; border-radius: 4px; }
+  .featured-blog-product--{{ section.id }} .product-form__add-button:hover:not(:disabled) { background-color: #333; }
+  .featured-blog-product--{{ section.id }} .product-form__add-button:disabled { background-color: #ccc; color: #888; cursor: not-allowed; }
+  .product-grid__gallery{
+     min-width:300px;
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Blog Post Product",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Details"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

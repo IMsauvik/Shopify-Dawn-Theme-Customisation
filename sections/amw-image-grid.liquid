@@ -1,0 +1,165 @@
+<link rel="stylesheet" href="{{ 'amw-image-grid-styles.css' | asset_url }}" >
+<div class="page-width" style="overflow: hidden;">
+  {%- if section.settings.title != blank -%}
+    <div class="dw-heading-special">{{ section.settings.title | escape }}</div>
+  {%- endif -%}
+
+  <div class="fixed-promo-grid">
+    {%- for i in (1..5) -%}
+      {%- assign image_setting = 'image_' | append: i -%}
+      {%- assign title_setting = 'title_' | append: i -%}
+      {%- assign link_setting = 'link_' | append: i -%}
+
+      {%- assign image = section.settings[image_setting] -%}
+      {%- assign title = section.settings[title_setting] -%}
+      {%- assign link = section.settings[link_setting] -%}
+
+      <div
+        class="promo-grid-item promo-grid-item--{{ i }}"
+        data-aos="fade-up"
+        data-aos-delay="{{ forloop.index | times: 100 }}"
+      >
+        <a href="{{ link.url | default: '#' }}" class="promo-grid-item__link">
+          <div class="promo-grid-item__image-wrapper">
+            {%- if image != blank -%}
+              <img
+                data-src="{{ image | image_url: width: 1200 }}"
+                alt="{{ image.alt | default: title | escape }}"
+                width="{{ image.width }}"
+                height="{{ image.height }}"
+                class="promo-grid-item__image lazy"
+              >
+            {%- else -%}
+              {{ 'collection-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+            <div class="promo-grid-item__overlay"></div>
+          </div>
+          {%- if title != blank -%}
+            <h3 class="promo-grid-item__title">{{ title | escape }}</h3>
+          {%- endif -%}
+        </a>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Fixed Promo Grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Fresh On The Nest"
+    },
+    {
+      "type": "header",
+      "content": "Item 1 (Top Left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Title",
+      "default": "Bowls"
+    },
+    {
+      "type": "collection",
+      "id": "link_1",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Item 2 (Top Middle)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Title",
+      "default": "Jars"
+    },
+    {
+      "type": "collection",
+      "id": "link_2",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Item 3 (Top Right)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Title",
+      "default": "Oil Dispenser"
+    },
+    {
+      "type": "collection",
+      "id": "link_3",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Item 4 (Bottom Left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_4",
+      "label": "Title",
+      "default": "Planters"
+    },
+    {
+      "type": "collection",
+      "id": "link_4",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Item 5 (Bottom Right - Wide)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_5",
+      "label": "Title",
+      "default": "Drinkware"
+    },
+    {
+      "type": "collection",
+      "id": "link_5",
+      "label": "Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Fixed Promo Grid"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,113 @@
+<!-- SIMPL HTML CODE FOR POPUP -->
+          <div id="simplText" style="display: flex; align-items: center;font-size:14px;">
+            <p>Or 3 interest free payments of ₹<span id="countInPaise"></span></p>
+            <img style="width: 10%;margin-left: 5px; margin-top: 0px;" src="{{ 'brand.svg' | asset_url }}" alt="SVG Image">
+            <img
+              style="margin-left: 4px; margin-top: 0px;"
+              onclick="openPopup()"
+              src="{{ 'info.svg' | asset_url }}"
+              alt="SVG Image"
+            >
+          </div>
+          <div id="popup" class="popup">
+          
+            <img
+              class="close-icon"
+              src="https://d19ud5ez64hf3q.cloudfront.net/popup/close.svg"
+              id="closeButton"
+              onclick="closeButton()"
+            >
+            <iframe
+              id="simpl_iframe"
+              style="
+                width: 400px; height: 665px; border: none;padding: 0px;
+                margin: 0px;
+              "
+            >
+            </iframe>
+          </div>
+          <style>
+            .popup {
+                  display: none;
+                  position: fixed;
+                  margin: 0px;
+                  z-index: 9999999999;
+                  height: 61rem;
+                  padding: 0px;
+                  top: 25%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  background-color: white;
+                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                }
+          
+
+              #closeButton{
+                    position: inherit;
+                    background: transparent;
+                    border: none;
+                    margin-left: 352px;
+                    color: white;
+                    margin-top: 24px;
+                    font-size: 27px;
+                  }
+
+              @media only screen and (max-width:600px){
+              .popup{
+                margin-right: auto;
+                margin-left: auto;
+              }
+              #simpl_iframe{
+              max-width: none !important;
+              }
+               #closeButton{
+                margin-left: 352px;
+               }
+            }
+          </style>  
+
+<script>
+      let toTal;
+             try{
+                 let price = "{{ product.price}}";
+                 let priceRm = convertPaiseToRupees(price);
+                 toTal = priceRm;
+                 let count = document.querySelector("#countInPaise");
+                let splitcalulate = async (data) => {
+                    const div = data / 3;
+                    const pow = Math.pow(10, 2);
+                    const final = Math.round(div * pow) / pow;
+                    const str = String(final);
+                    if (str.includes(".")) return (final + 0.01).toFixed(2);
+                    else return final;
+                  };
+
+                let cal =  splitcalulate(priceRm)
+                cal.then((value)=>{
+                    count.innerHTML = value;
+
+                })
+
+             }catch(e){
+               console.log(e)
+             }
+          
+  function convertPaiseToRupees(paise) {
+              return paise / 100;
+            }
+
+            let openPopup = () =>{
+               console.log("Clicked")
+               let iframe = document.getElementById("simpl_iframe");
+               iframe.src = "https://d19ud5ez64hf3q.cloudfront.net/popup/index.html?price=" + toTal;
+               let popup = document.getElementById("popup");
+               popup.style.display = "block";
+
+              }
+
+            let closeButton = () =>{
+                 let popup = document.getElementById("popup");
+                 popup.style.display="none";
+            }  
+
+</script>

@@ -1,0 +1,20 @@
+{%- comment -%}
+  # Caution! Please read https://help.shopify.com/en/manual/promoting-marketing/seo/editing-robots-txt before proceeding to make changes to this file.
+{%- endcomment -%}
+
+{%- comment -%}
+  # Explicitly allow Googlebot to crawl all content (important for Google Merchant Center)
+{%- endcomment -%}
+User-agent: Googlebot
+Disallow:
+{% for group in robots.default_groups %}
+  {{- group.user_agent -}}
+
+  {% for rule in group.rules %}
+    {{- rule -}}
+  {% endfor %}
+
+  {%- if group.sitemap != blank -%}
+    {{ group.sitemap }}
+  {%- endif -%}
+{% endfor %}

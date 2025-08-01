@@ -1,0 +1,279 @@
+{% comment %}
+  Simple 5 Image Grid Section - Fixed CSS Conflicts
+  Clean grid layout with scoped styling to prevent conflicts
+{% endcomment %}
+
+<section class="simple-image-grid-section page-width" id="section-{{ section.id }}">
+  <div class="simple-grid-page-width">
+    <div class="dw-heading-special simple-grid-heading">{{ section.settings.heading }}</div>
+    <div class="simple-images-grid">
+      {% for block in section.blocks %}
+        {% assign offer = block.settings %}
+        <div class="simple-image-item" {{ block.shopify_attributes }}>
+          <a href="{% if offer.collection != blank %}{{ collections[offer.collection].url }}{% else %}#{% endif %}" 
+             class="simple-image-link"
+             {% if offer.collection == blank %}onclick="return false;"{% endif %}>
+            
+            {% if offer.offer_image != blank %}
+              <img data-src="{{ offer.offer_image | img_url: 'master' }}" 
+                   alt="{{ offer.alt_text | escape }}"
+                   class="simple-grid-image lazy"
+                   loading="lazy">
+            {% else %}
+              <div class="simple-image-placeholder">
+                <span>Upload Image</span>
+              </div>
+            {% endif %}
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+/* Scoped styles for Simple Image Grid Section */
+#section-{{ section.id }}.simple-image-grid-section {
+  padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;
+  background: {{ section.settings.section_bg_color }};
+  position: relative;
+  z-index: 1;
+}
+
+#section-{{ section.id }} .simple-grid-page-width {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+#section-{{ section.id }} .simple-images-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: {{ section.settings.grid_gap }}px;
+  align-items: start;
+  width: 100%;
+}
+
+/* Mobile: 2 columns */
+@media (max-width: 768px) {
+  #section-{{ section.id }} .simple-images-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: {{ section.settings.mobile_gap }}px;
+  }
+  
+  #section-{{ section.id }} .simple-grid-page-width {
+    padding: 0 15px;
+  }
+}
+
+/* Tablet: 3 columns */
+@media (max-width: 1024px) and (min-width: 769px) {
+  #section-{{ section.id }} .simple-images-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+#section-{{ section.id }} .simple-image-item {
+  position: relative;
+  transition: transform 0.3s ease;
+  width: 100%;
+}
+
+#section-{{ section.id }} .simple-image-item:hover {
+  transform: translateY(-5px);
+}
+
+#section-{{ section.id }} .simple-image-link {
+  display: block;
+  text-decoration: none;
+  width: 100%;
+}
+
+#section-{{ section.id }} .simple-grid-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: {{ section.settings.border_radius }}px;
+  transition: all 0.3s ease;
+  object-fit: contain;
+  max-width: 100%;
+}
+
+#section-{{ section.id }} .simple-image-item:hover .simple-grid-image {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+#section-{{ section.id }} .simple-image-placeholder {
+  width: 100%;
+  min-height: 200px;
+  background: #f5f5f5;
+  border: 2px dashed #ddd;
+  border-radius: {{ section.settings.border_radius }}px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+#section-{{ section.id }} .simple-grid-heading {
+  margin-bottom: 30px;
+}
+
+@media (max-width: 480px) {
+  #section-{{ section.id }}.simple-image-grid-section {
+    padding: {{ section.settings.padding_top | divided_by: 2 }}px 0 {{ section.settings.padding_bottom | divided_by: 2 }}px 0;
+  }
+}
+
+/* Reset any inherited styles that might cause conflicts */
+#section-{{ section.id }} * {
+  box-sizing: border-box;
+}
+
+#section-{{ section.id }} .simple-image-link:hover,
+#section-{{ section.id }} .simple-image-link:focus,
+#section-{{ section.id }} .simple-image-link:active {
+  text-decoration: none;
+  outline: none;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Simple Image Grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Add Heading",
+      "default": "Offers"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Desktop Gap Between Images",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_gap",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile Gap Between Images",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 8
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "offer_image",
+          "label": "Upload Image"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Image Alt Text"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Link to Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Simple Image Grid",
+      "blocks": [
+        {
+          "type": "image",
+          "settings": {
+            "alt_text": "Offer 1"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "alt_text": "Offer 2"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "alt_text": "Offer 3"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "alt_text": "Offer 4"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "alt_text": "Offer 5"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

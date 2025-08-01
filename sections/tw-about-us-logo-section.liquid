@@ -1,0 +1,118 @@
+
+{% stylesheet %}
+<style>
+  .about-us-logo-section {
+    padding: 20px;
+    text-align: center;
+  
+  }
+
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+    align-items: center;
+  }
+
+  .logo-item {
+    text-align: center;
+  }
+
+.logo-item img {
+    width: 100%;
+    max-width: 100px;
+    height: auto;
+    margin: 0 auto;
+    background: #fff;
+    padding: 11px;
+    border-radius: 18%;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px; */
+}
+
+  .logo-item p {
+    font-size: 17px;
+    color: #333;
+    margin-top: 10px;
+    font-weight:900;
+    line-height:normal;
+  }
+  .about-us-logo-section{
+    background: #c8c8c8;
+    padding-block: 28px;
+      padding-bottom: 10px;
+  }
+  .about-us-logo-section .logo-grid{
+     width:90%;
+    margin:auto;
+  } 
+  
+  @media (max-width: 768px) {
+      .about-us-logo-section .logo-grid{
+     width:98%;
+    margin:auto;
+  } 
+    .logo-item img {
+    width: 100%;
+    max-width: 70px;
+    height: auto;
+    margin: 0 auto;
+    background: #fff;
+    padding: 6px;
+    border-radius: 18%;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px; */
+}
+    .logo-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .logo-item p {
+ font-size: 14px;
+        color: #333;
+        margin-top: 10px;
+        font-weight: 400;
+}
+  }
+</style>
+{% endstylesheet %}
+
+<div class="about-us-logo-section  ">
+  <div class="logo-grid page-width">
+    {% for block in section.blocks %}
+      <div class="logo-item">
+        <img src="{{ block.settings.add_logo_image | image_url }}" alt="Logo Image">
+        <p>{{ block.settings.add_text_below_image }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "About Us Logo Section",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "add_logo",
+      "name": "Add logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Add logo image",
+          "id": "add_logo_image"
+        },
+        {
+          "type": "text",
+          "label": "Add text below image",
+          "id": "add_text_below_image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Us Logo Section"
+    }
+  ]
+}
+{% endschema %}

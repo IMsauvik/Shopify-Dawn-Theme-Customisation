@@ -1,0 +1,812 @@
+{% comment %}
+  Shopify Scratch Card Pop-up Section
+  - Enhanced auto-clear animation
+  - Shows static image during scratching
+  - Reveals GIF after auto-clear for exactly 2 seconds
+  - Then proceeds to product details
+  - Adds specific product to cart when "Shop Now" button is clicked
+{% endcomment %}
+
+{{ 'section-scratch-popup.css' | asset_url | stylesheet_tag }}
+
+<div id="scratch-popup-section" class="scratch-popup-section" data-section-id="{{ section.id }}" style="display: none;">
+  <div class="scratch-popup-overlay" id="scratch-popup-overlay">
+    <div class="scratch-popup-container">
+      <!-- Scratch Card Step -->
+      <div class="scratch-popup-step" id="popup-step-1">
+        <button type="button" class="popup-close-button" id="popup-close-button-1">×</button>
+        <div class="popup-header">
+          <h2>{{ section.settings.scratch_card_title }}</h2>
+          <p>{{ section.settings.scratch_card_subtitle }}</p>
+        </div>
+
+        <div class="scratch-card">
+          <!-- Layered approach for reveal stages -->
+          
+          <!-- Layer 3 (top): Canvas scratch area -->
+          <div class="scratch-card-cover-container" id="scratch-card-cover-container">
+            <canvas class="scratch-card-canvas" id="scratch-card-canvas"></canvas>
+            <img class="scratch-card-canvas-render hidden" id="scratch-card-canvas-render" alt="">
+          </div>
+          
+          <!-- Layer 2 (middle): Static image revealed during scratching -->
+          <div class="scratch-card-static-container" id="scratch-card-static-container">
+            <img class="scratch-card-static-image" id="scratch-card-static-image" 
+                 src="{{ section.settings.static_reveal_image | img_url: 'master' }}" 
+                 alt="Static Reveal">
+          </div>
+          
+          <div class="scratch-card-gif-container hidden" id="scratch-card-gif-container">
+            <img class="scratch-card-gif-image" id="scratch-card-gif-image" 
+                 src="{{ section.settings.reward_image | img_url: 'master' }}" 
+                 alt="{{ section.settings.reward_image.alt | default: 'Surprise Gift' }}">
+          </div>
+        </div>
+
+        <p class="scratch-card-text" id="scratch-card-text">🎁 {{ section.settings.scratch_card_message }}</p>
+      </div>
+
+      <!-- Product Details Step -->
+      <div class="scratch-popup-step hidden" id="popup-step-2">
+        <button type="button" class="popup-close-button" id="popup-close-button-2">×</button>
+        <div class="popup-header">
+          <h2>{{ section.settings.reward_title }}</h2>
+          <p>{{ section.settings.reward_subtitle }}</p>
+        </div>
+
+        <div class="product-reward-container">
+          {% if section.settings.product != blank %}
+            {% assign product = section.settings.product %}
+            <div class="product-image-container">
+                {% if product.featured_image != blank %}
+                 <img src="{{ product.featured_image | img_url: 'medium' }}"
+                      alt="{{ product.featured_image.alt | escape }}"
+                      loading="lazy"
+                      width="{{ product.featured_image.width }}"
+                      height="{{ product.featured_image.height }}"
+                      style="width: 100px; height: auto;">
+                {% else %}
+                     {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {% endif %}
+            </div>
+            <div class="product-details">
+              <h3 class="product-title">{{ product.title }}</h3>
+              <div class="product-price-container">
+                <span class="product-price">{{ product.price | money }}</span>
+                {% if product.compare_at_price > product.price %}
+                  <span class="product-compare-price">{{ product.compare_at_price | money }}</span>
+                {% endif %}
+              </div>
+               <div class="coupon-container">
+                 <div class="coupon-code" id="coupon-code">{{ section.settings.coupon_code }}</div>
+                 <button type="button" class="copy-coupon-btn" id="copy-coupon-btn">Copy</button>
+               </div>
+               {%- form 'product', product, id: 'product-form-popup', class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+                 <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                 <input type="hidden" name="quantity" value="1">
+                 
+                 <button 
+                   type="submit" 
+                   name="add" 
+                   class="redeem-button" 
+                   id="add-to-cart-btn"
+                   {% if product.available == false %}disabled{% endif %}
+                 >
+                   {% if product.available %}
+                     {{ section.settings.redeem_button_text }}
+                   {% else %}
+                     {{ 'products.product.sold_out' | t }}
+                   {% endif %}
+                 </button>
+               {%- endform -%}
+            </div>
+          {% else %}
+            <div class="product-details" style="text-align: center; width: 100%;">
+              <p><i>Configure reward product in theme editor.</i></p>
+               <div class="coupon-container" style="justify-content: center;">
+                 <div class="coupon-code" id="coupon-code">{{ section.settings.coupon_code }}</div>
+                 <button type="button" class="copy-coupon-btn" id="copy-coupon-btn">Copy</button>
+               </div>
+               <button 
+                   type="button" 
+                   class="redeem-button" 
+                   id="add-to-cart-btn" 
+                   disabled
+                 >
+                   {{ section.settings.redeem_button_text }}
+                   <span style="display: block; font-size: 12px; margin-top: 5px;">Configure product in theme editor</span>
+                 </button>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include the confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sectionElement = document.getElementById('scratch-popup-section');
+  if (!sectionElement) return;
+
+  // --- Configuration ---
+  const showForNewVisitors = {{ section.settings.show_for_new_visitors }};
+  const popupDelay = {{ section.settings.popup_delay | times: 1000 }}; // ms
+  const scratchThreshold = {{ section.settings.scratch_threshold }}; // Percentage
+  const mobileThresholdReduction = 15; // Make it easier on mobile
+  
+  // --- Elements ---
+  const popupOverlay = document.getElementById('scratch-popup-overlay');
+  const popupContainer = popupOverlay.querySelector('.scratch-popup-container');
+  const popupStep1 = document.getElementById('popup-step-1');
+  const popupStep2 = document.getElementById('popup-step-2');
+  const closeButtons = document.querySelectorAll('.popup-close-button');
+  const copyButton = document.getElementById('copy-coupon-btn');
+  const couponCodeElement = document.getElementById('coupon-code');
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+
+  // Scratch Card Elements
+  const scratchCardCoverContainer = document.getElementById('scratch-card-cover-container');
+  const scratchCardStaticContainer = document.getElementById('scratch-card-static-container');
+  const scratchCardGifContainer = document.getElementById('scratch-card-gif-container');
+  const scratchCardGifImage = document.getElementById('scratch-card-gif-image');
+  const canvas = document.getElementById('scratch-card-canvas');
+  const canvasRender = document.getElementById('scratch-card-canvas-render');
+  const scratchCardText = document.getElementById('scratch-card-text');
+
+  // --- State Variables ---
+  let isPointerDown = false;
+  let isRevealed = false;
+  let isAutoClearing = false;
+  let positionX, positionY;
+  let canvasContext = null;
+  let clearDetectionTimeout = null;
+  let setImageTimeout = null;
+  let previousBlobUrl = null;
+  let clearAnimation = null;
+
+  // --- Browser/Device Detection ---
+  const isMobile = window.innerWidth <= 768;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const useRenderImage = isIOS || isSafari;
+
+  // --- Functions ---
+  function showPopup() {
+    sectionElement.style.display = 'block';
+    requestAnimationFrame(() => {
+      popupOverlay.classList.add('active');
+      initScratchCard();
+    });
+  }
+
+  function closePopup() {
+    popupOverlay.classList.remove('active');
+    localStorage.setItem('scratchPopupClosed', 'true');
+  }
+
+  function initScratchCard() {
+    if (!canvas.getContext) {
+      console.error("Canvas not supported in this browser.");
+      return;
+    }
+    
+    canvasContext = canvas.getContext('2d', { willReadFrequently: true });
+    
+    // Set initial sizes and draw the canvas
+    resizeCanvas();
+    
+    // Set up event handlers for scratching
+    setupScratchListeners();
+    
+    // Handle window resizing
+    window.addEventListener('resize', resizeCanvas);
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    // Also resize fallback image for Safari/iOS
+    if (useRenderImage) {
+      canvasRender.style.width = rect.width + 'px';
+      canvasRender.style.height = rect.height + 'px';
+    }
+    
+    // Draw the solid color scratch surface
+    initCanvas();
+  }
+
+  function initCanvas() {
+    if (!canvasContext) return;
+    
+    // Clear and prepare canvas
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    canvasContext.globalCompositeOperation = 'source-over';
+    
+    // Use a solid color with a gradient for better visual appearance
+    const gradient = canvasContext.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#D8D8D8");
+    gradient.addColorStop(0.5, "#C4C4C4");
+    gradient.addColorStop(1, "#DADADA");
+    
+    canvasContext.fillStyle = gradient;
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Add some texture to make it look more like a scratch card
+    canvasContext.fillStyle = "rgba(255, 255, 255, 0.2)";
+    for (let i = 0; i < canvas.width; i += 10) {
+      for (let j = 0; j < canvas.height; j += 10) {
+        if (Math.random() > 0.8) {
+          canvasContext.fillRect(i, j, 4, 4);
+        }
+      }
+    }
+    
+    // Ensure everything is visible
+    scratchCardCoverContainer.style.opacity = '1';
+    scratchCardCoverContainer.style.visibility = 'visible';
+    
+    // Try loading the SVG from settings
+    try {
+      const svgUrl = '{{ section.settings.scratch_surface_svg | img_url: "master" }}';
+      
+      if (svgUrl && svgUrl.trim() !== '') {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        
+        img.onload = function() {
+          // If the image loaded successfully, draw it on the canvas
+          canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+          canvasContext.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          if (useRenderImage) {
+            setImageFromCanvas();
+          }
+        };
+        
+        img.onerror = function() {
+          // Fallback texture is already drawn
+          if (useRenderImage) {
+            setImageFromCanvas();
+          }
+        };
+        
+        // Try to load the SVG
+        img.src = svgUrl;
+      }
+    } catch (e) {
+      console.log("Using fallback scratch surface");
+    }
+    
+    // Update the fallback image for Safari/iOS
+    if (useRenderImage) {
+      setImageFromCanvas();
+      canvasRender.classList.remove('hidden');
+    } else {
+      canvasRender.classList.add('hidden');
+    }
+  }
+
+  function setupScratchListeners() {
+    // Remove any existing listeners
+    canvas.removeEventListener('mousedown', handlePointerDown);
+    canvas.removeEventListener('touchstart', handlePointerDown);
+    
+    // Add fresh listeners
+    canvas.addEventListener('mousedown', handlePointerDown);
+    canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+  }
+
+  function handlePointerDown(e) {
+    if (isRevealed || isAutoClearing) return;
+    e.preventDefault();
+    
+    isPointerDown = true;
+    const pos = getPosition(e);
+    positionX = pos.x;
+    positionY = pos.y;
+    
+    // Set up canvas for scratching
+    canvasContext.globalCompositeOperation = "destination-out";
+    canvasContext.lineWidth = isMobile ? 45 : 35;
+    canvasContext.lineCap = "round";
+    canvasContext.lineJoin = "round";
+    
+    // Draw initial dot
+    canvasContext.beginPath();
+    canvasContext.arc(positionX, positionY, canvasContext.lineWidth / 2, 0, Math.PI * 2);
+    canvasContext.fill();
+    
+    // Add document-level move and up handlers
+    document.addEventListener('mousemove', handlePointerMove);
+    document.addEventListener('touchmove', handlePointerMove, { passive: false });
+    document.addEventListener('mouseup', handlePointerUp);
+    document.addEventListener('touchend', handlePointerUp);
+    
+    // Update Safari fallback if needed
+    if (useRenderImage) {
+      setImageFromCanvas();
+    }
+  }
+
+  function handlePointerMove(e) {
+    if (!isPointerDown || isRevealed || isAutoClearing) return;
+    e.preventDefault();
+    
+    const pos = getPosition(e);
+    
+    // Draw scratch line
+    canvasContext.beginPath();
+    canvasContext.moveTo(positionX, positionY);
+    canvasContext.lineTo(pos.x, pos.y);
+    canvasContext.stroke();
+    
+    // Update position
+    positionX = pos.x;
+    positionY = pos.y;
+    
+    // Update Safari fallback
+    if (useRenderImage) {
+      clearTimeout(setImageTimeout);
+      setImageTimeout = setTimeout(setImageFromCanvas, 16);
+    }
+  }
+
+  function handlePointerUp() {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+    
+    // Remove document-level handlers
+    document.removeEventListener('mousemove', handlePointerMove);
+    document.removeEventListener('touchmove', handlePointerMove);
+    document.removeEventListener('mouseup', handlePointerUp);
+    document.removeEventListener('touchend', handlePointerUp);
+    
+    // Check if we've scratched enough
+    clearTimeout(clearDetectionTimeout);
+    clearDetectionTimeout = setTimeout(checkScratchPercentage, 300);
+  }
+
+  function getPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+    
+    if (event.type.includes('touch')) {
+      const touch = event.touches[0] || event.changedTouches[0];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    } else {
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    }
+  }
+
+  function setImageFromCanvas() {
+    if (!canvas || !canvasRender) return;
+    
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const newUrl = URL.createObjectURL(blob);
+        if (previousBlobUrl) {
+          URL.revokeObjectURL(previousBlobUrl);
+        }
+        canvasRender.src = newUrl;
+        previousBlobUrl = newUrl;
+      }
+    });
+  }
+
+  function checkScratchPercentage() {
+    if (isRevealed || isAutoClearing) return;
+    
+    try {
+      const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+      const pixelData = imageData.data;
+      const totalPixels = canvas.width * canvas.height;
+      let transparentPixels = 0;
+      
+      // Sample pixels for performance
+      const samplingFactor = isMobile ? 10 : 6;
+      for (let i = 3; i < pixelData.length; i += 4 * samplingFactor) {
+        if (pixelData[i] < 128) { // Check alpha channel
+          transparentPixels++;
+        }
+      }
+      
+      const sampledPixelsChecked = totalPixels / samplingFactor;
+      const scratchPercentage = (transparentPixels / sampledPixelsChecked) * 100;
+      
+      // Get adjusted threshold based on device
+      const currentThreshold = isMobile ? 
+        (scratchThreshold - mobileThresholdReduction) : 
+        scratchThreshold;
+      
+      const finalThreshold = Math.max(15, currentThreshold);
+      
+      console.log(`Scratch percentage: ${scratchPercentage.toFixed(1)}% (Threshold: ${finalThreshold}%)`);
+      
+      if (scratchPercentage >= finalThreshold) {
+        // Auto-clear the remaining scratch area
+        autoClearScratchCard();
+      }
+    } catch (error) {
+      console.error("Error checking scratch percentage:", error);
+      // Fallback: just reveal if there's an error
+      autoClearScratchCard();
+    }
+  }
+
+  // Auto-clear the remaining scratch area with animation
+  function autoClearScratchCard() {
+    if (isAutoClearing) return;
+    isAutoClearing = true;
+    
+    // Update text immediately
+    scratchCardText.textContent = `🎉 {{ section.settings.reward_revealed_message | escape }}`;
+    
+    // Cancel any existing clear animation
+    if (clearAnimation) {
+      cancelAnimationFrame(clearAnimation);
+    }
+    
+    // Center coordinates
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    // Maximum radius to cover the entire canvas
+    const maxRadius = Math.sqrt(Math.pow(canvas.width, 2) + Math.pow(canvas.height, 2)) / 2;
+    let currentRadius = 0;
+    
+    // Set for clearing
+    canvasContext.globalCompositeOperation = "destination-out";
+    
+    // Animation function using requestAnimationFrame for smoother animation
+    function animateClear() {
+      // Increase radius with accelerating speed
+      currentRadius += Math.max(5, currentRadius * 0.2);
+      
+      // Clear the canvas in expanding circle
+      canvasContext.beginPath();
+      canvasContext.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+      canvasContext.fill();
+      
+      if (useRenderImage) {
+        setImageFromCanvas();
+      }
+      
+      // Continue animation until we cover the entire canvas
+      if (currentRadius < maxRadius) {
+        clearAnimation = requestAnimationFrame(animateClear);
+      } else {
+        // Completely clear any remaining spots
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (useRenderImage) {
+          setImageFromCanvas();
+        }
+        
+        // Add clear class and ensure cover container is gone
+        scratchCardCoverContainer.classList.add('clear');
+        setTimeout(() => {
+          scratchCardCoverContainer.classList.add('hidden');
+          
+          // Switch to the GIF after a very short delay
+          setTimeout(() => {
+            // Hide static image and show GIF
+            scratchCardStaticContainer.classList.add('hidden');
+            scratchCardGifContainer.classList.remove('hidden');
+            
+            // Animate GIF entrance
+            scratchCardGifImage.classList.add('animate');
+            
+            // Wait exactly 2 seconds for GIF to play
+            setTimeout(() => {
+              // Move to product details step
+              popupStep1.classList.add('hidden');
+              popupStep2.classList.remove('hidden');
+              
+              // Trigger confetti effect
+              triggerConfetti();
+              
+              // Complete reveal process
+              isRevealed = true;
+              
+              // Mark as visited
+              localStorage.setItem('hasVisitedStore', 'true');
+            }, 3000); // Exactly 2 seconds for GIF animation
+          }, 200); // Very short delay before showing GIF
+        }, 200); // Short delay to ensure canvas clear effect completes
+      }
+    }
+    
+    // Start the animation
+    clearAnimation = requestAnimationFrame(animateClear);
+  }
+
+  function triggerConfetti() {
+    confetti({
+      particleCount: isMobile ? 100 : 150,
+      spread: isMobile ? 70 : 90,
+      origin: { y: 0.3, x: 0.5 },
+      zIndex: 10001
+    });
+  }
+
+  // --- Store coupon code when revealed ---
+  function storeScratchCardCoupon() {
+    // If coupon code exists, add it to localStorage
+    const couponCode = couponCodeElement ? couponCodeElement.textContent.trim() : '';
+    if (couponCode) {
+      localStorage.setItem('scratchCardCoupon', couponCode);
+    }
+  }
+  
+  // Call this function when popup is revealed
+  function openCartAfterSubmission() {
+    // Store the coupon code
+    storeScratchCardCoupon();
+    
+    // Open cart drawer if available on the theme
+    if (typeof window.openCartDrawer === 'function') {
+      window.openCartDrawer();
+    } else if (document.querySelector('.cart-drawer')) {
+      document.querySelector('.cart-drawer').classList.add('active');
+    } else if (document.querySelector('[data-cart-drawer]')) {
+      document.querySelector('[data-cart-drawer]').classList.add('open');
+    } else {
+      // Try to trigger cart icons
+      const cartIcons = document.querySelectorAll('.cart-icon, .cart-link, [data-cart-toggle], [data-drawer-trigger="cart"]');
+      if (cartIcons.length > 0) {
+        cartIcons[0].click();
+      } else {
+        // Last resort: redirect to cart page
+        window.location.href = window.Shopify.routes.root + 'cart';
+      }
+    }
+  }
+
+  // --- Event Listeners ---
+  closeButtons.forEach(button => {
+    button.addEventListener('click', closePopup);
+  });
+
+  // Close when clicking outside the modal
+  popupOverlay.addEventListener('click', function(e) {
+    if (e.target === popupOverlay) {
+      closePopup();
+    }
+  });
+
+  // Copy coupon code functionality
+  if (copyButton && couponCodeElement) {
+    copyButton.addEventListener('click', function() {
+      const codeToCopy = couponCodeElement.textContent;
+      navigator.clipboard.writeText(codeToCopy)
+        .then(() => {
+          const originalText = copyButton.textContent;
+          copyButton.textContent = 'Copied!';
+          copyButton.disabled = true;
+          setTimeout(() => {
+            copyButton.textContent = originalText;
+            copyButton.disabled = false;
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy coupon code:', err);
+          alert('Could not copy code. Please select and copy manually.');
+        });
+    });
+  }
+
+  // Handle "no product selected" case
+  if (addToCartBtn && addToCartBtn.type !== 'submit') {
+    addToCartBtn.addEventListener('click', function() {
+      alert('Please configure a product in the theme editor first.');
+    });
+  }
+  
+  // For the form submission case, we'll use the Shopify AJAX API to handle it
+  const productForm = document.getElementById('product-form-popup');
+  if (productForm) {
+    productForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent default form submission
+      
+      // Show loading state
+      if (addToCartBtn) {
+        addToCartBtn.textContent = 'Adding...';
+        addToCartBtn.disabled = true;
+      }
+      
+      // Get form data
+      const formData = new FormData(productForm);
+      
+      // Store coupon code
+      storeScratchCardCoupon();
+      
+      // Submit the form using Fetch API
+      fetch(window.Shopify.routes.root + 'cart/add.js', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Product added to cart:', data);
+        
+        // Success - update button
+        if (addToCartBtn) {
+          addToCartBtn.textContent = 'Added to Cart!';
+          
+          // After a short delay, close popup and open cart
+          setTimeout(() => {
+            closePopup();
+            openCartAfterSubmission();
+          }, 1200);
+        }
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        
+        // Restore button state
+        if (addToCartBtn) {
+          addToCartBtn.textContent = 'Shop Now';
+          addToCartBtn.disabled = false;
+        }
+        
+        alert('Could not add item to cart. Please try again.');
+      });
+    });
+  }
+
+  // --- Initialize ---
+  const hasVisited = localStorage.getItem('hasVisitedStore');
+  const popupClosedSession = localStorage.getItem('scratchPopupClosed');
+
+  if (popupClosedSession !== 'true') {
+    if (!showForNewVisitors || !hasVisited) {
+      setTimeout(showPopup, popupDelay);
+    }
+  }
+});
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Scratch Card Popup",
+  "class": "shopify-section--scratch-popup",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Popup Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_for_new_visitors",
+      "label": "Show for new visitors only",
+      "info": "Uses localStorage to track visits. Will reappear if cache/storage is cleared.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "popup_delay",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "sec",
+      "label": "Popup delay",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Step 1: Scratch Card"
+    },
+    {
+      "type": "image_picker",
+      "id": "scratch_surface_svg",
+      "label": "Scratch Surface Image (SVG recommended)",
+      "info": "The image used for the scratchable layer. Default silver pattern used if empty. Use an SVG for best results."
+    },
+    {
+      "type": "text",
+      "id": "scratch_card_title",
+      "label": "Scratch Card Title",
+      "default": "You've Got a Surprise!"
+    },
+    {
+      "type": "text",
+      "id": "scratch_card_subtitle",
+      "label": "Scratch Card Subtitle",
+      "default": "Scratch the card below to reveal your exclusive reward"
+    },
+    {
+      "type": "image_picker",
+      "id": "static_reveal_image",
+      "label": "Reward Placeholder Image (Static)",
+      "info": "Static image shown during scratching. Use a frame from your GIF or a teaser image."
+    },
+    {
+      "type": "image_picker",
+      "id": "reward_image",
+      "label": "Revealed Reward Image (GIF/PNG)",
+      "info": "The image or GIF revealed after scratching is complete."
+    },
+    {
+      "type": "text",
+      "id": "scratch_card_message",
+      "label": "Initial Scratch Message",
+      "default": "Scratch for a surprise!"
+    },
+    {
+      "type": "range",
+      "id": "scratch_threshold",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Scratch threshold percentage",
+      "default": 50,
+      "info": "Percentage of card that needs to be scratched before auto-revealing the full reward."
+    },
+    {
+      "type": "header",
+      "content": "Step 2: Reward Details"
+    },
+    {
+      "type": "text",
+      "id": "reward_title",
+      "label": "Reward Title (After Scratch)",
+      "default": "Congratulations!"
+    },
+    {
+      "type": "text",
+      "id": "reward_subtitle",
+      "label": "Reward Subtitle (After Scratch)",
+      "default": "You've unlocked an exclusive discount!"
+    },
+    {
+      "type": "text",
+      "id": "reward_revealed_message",
+      "label": "Message During Reveal",
+      "default": "You won a special discount!"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Featured Product (Optional)",
+      "info": "Select a product to display with the coupon."
+    },
+    {
+      "type": "text",
+      "id": "coupon_code",
+      "label": "Coupon Code",
+      "default": "WELCOME15"
+    },
+    {
+      "type": "text",
+      "id": "redeem_button_text",
+      "label": "Redeem Button Text",
+      "default": "Shop Now"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scratch Card Popup",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

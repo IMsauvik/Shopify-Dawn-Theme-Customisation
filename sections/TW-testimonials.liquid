@@ -1,0 +1,712 @@
+<style>
+    #shopify-section-{{ section.id }} {
+      .dw-t-testimonials-section{
+          margin-top: 26px;
+      }
+      .tw-center {
+        text-align: center;
+      }
+     .swiper .swiper-slide{
+       transform-origin: center !important;
+     }
+
+      .tw-container {
+        padding-inline: {{ section.settings.horizontal_padding }}px;
+        padding-block: {{ section.settings.vertical_padding }}px;
+      }
+      @media screen and (max-width: 800px) {
+        .tw-heading {
+          font-size: calc({{ section.settings.heading_font_size }}px * 0.75);
+        }
+        .tw-body {
+          font-size: 13px;
+        }
+        .tw-container {
+          padding-inline: calc({{ section.settings.horizontal_padding }}px / 4);
+          padding-block: calc({{ section.settings.vertical_padding }}px / 4);
+        }
+      }
+
+      .dw-heading span {
+        color: {{ section.settings.green_color }};
+      }
+
+      @media (max-width: 1079px) {
+        .dw-t-testimonials-section {
+          margin-bottom: 40px;
+          position: relative;
+        }
+
+        .dw-t-testimonial-colone-div {
+          position: absolute;
+          bottom: 0;
+          right: 10px;
+          width: 90px;
+          height: 90px;
+        }
+        .dw-t-testimonial-colone-div img {
+          width: 100%;
+          opacity: 0.5;
+        }
+        .new-dw-heading {
+          margin-bottom: 16px;
+          width: 90%;
+          margin-inline: auto;
+        }
+        .dw-swiper-btn {
+          background: #00000063;
+          border-radius: 50%;
+          height: 30px;
+          width: 30px;
+        }
+        .dw-t-testimonials-section .swiper-button-next:after,
+        .dw-t-testimonials-section .swiper-button-prev:after {
+          display: none;
+        }
+        .dw-heading-new {
+          width: 90%;
+          margin-inline: auto;
+          margin-bottom: 16px;
+        }
+        .dw-t-mobile-dib {
+          display: flex;
+          align-items: center;
+          justify-content: start;
+          width: 89%;
+          padding-bottom: 10px;
+          gap: 10px;
+          flex-direction: row;
+        }
+        .dw-t-img-div {
+          width: 100px;
+          height: 100px;
+        }
+        .dw-testimonial-desktop {
+          display: none !important;
+        }
+        .dw-testimonial-mobile {
+          display: flex !important;
+        }
+        .dw-t-testimonial-content-img {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+        }
+        .dw-t-testimonial-image {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        .dw-t-testimonials-section .swiper-container {
+          position: relative;
+          width: 85vw;
+        }
+        .dw-t-testimonial-below img {
+          display: none;
+        }
+        .dw-t-testimonial-colone {
+        // display:none;
+      }
+      .dw-t-testimonial-content {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+        position: relative;
+        background: #FFF8DE;
+        border-radius: 15px;
+      }
+      .dw-t-testimonial-colone-div img {
+        width: 100%;
+      }
+      .dw-t-testimonial-text {
+        text-align: center;
+        padding-inline: 5%;
+      }
+
+      .dw-t-testimonial-below {
+        position: absolute;
+        bottom: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+
+      }
+      .dw-t-testimonial-below img {
+        width: 100%;
+      }
+    }
+    @media (min-width: 1080px) {
+      .dw-testimonial-desktop {
+        display: flex !important;
+      }
+      .dw-testimonial-mobile {
+        display: none !important;
+      }
+      .dw-t-testimonial-below {
+        position: absolute;
+        bottom: 12%;
+        left: 35%;
+        transform: translateX(-40%);
+
+      }
+      .dw-t-testimonial-below img {
+        width: 100%;
+      }
+      .dw-t-testimonials-section .swiper-slide-prev .dw-t-testimonial-overlay {
+        display: block !important;
+      }
+      .dw-t-testimonials-section .swiper-slide-next .dw-t-testimonial-overlay {
+        display: block !important;
+      }
+      .dw-t-testimonial-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff8deba;
+        z-index: 1;
+      }
+      .dw-t-testimonial-colone-div {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 90px;
+        display: none;
+      }
+      .swiper-slide-active .dw-t-testimonial-colone-div {
+        display: block
+      }
+      .dw-t-testimonial-colone-div img {
+        width: 100%;
+      }
+
+      .dw-t-testimonial-author {
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 40px;
+        text-align: left;
+        margin-block: 1rem;
+      }
+      .dw-t-testimonials-section .swiper-button-next:after,
+      .dw-t-testimonials-section .swiper-button-prev:after {
+        display: none;
+      }
+
+      .dw-t-testimonials-section .swiper-button-prev {
+        top: 76.5%;
+        left: 15%;
+        position: absolute;
+        padding: 16px 50px;
+        color: white;
+      }
+      .dw-t-testimonials-section .swiper-button-next {
+        top: 77%;
+        right: 16%;
+        position: absolute;
+        padding: 16px 50px;
+        color: white;
+      }
+      .dw-t-testimonials-section .swiper-slide-prev {
+        margin-right: -9.5%;
+      }
+      .dw-t-testimonials-section .swiper-slide-next {
+        margin-left: -9.5%;
+      }
+      .dw-t-testimonials-section .swiper-container {
+        position: relative;
+        width: 85vw;
+      }
+      .dw-t-testimonials-section .swiper-container > .swiper-slide__content {
+        position: absolute;
+        top: 0;
+      }
+      .dw-t-testimonials-section .swiper-wrapper {
+        left: 0.7%;
+        margin-top: 5%;
+        transition: transform 0.6s ease;
+      }
+      .dw-t-testimonials-section .swiper-slide {
+        display: flex;
+        /* background: #eee; */
+        align-items: center;
+        justify-content: center;
+        /* transition: all 400ms cubic-bezier(0.6, 1, 0.8, 0); */
+        transition: transform 0.5s ease;
+        transform: scale(0.4);
+        /* width:33.33% !important; */
+        &.swiper-slide-active {
+          transform: scale(1);
+          /* background: #fc0; */
+          width: 50% !important;
+          margin-top: -1.1%;
+        }
+      }
+
+      .dw-t-testimonial-content {
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+      .dw-t-testimonial-image {
+        flex: 1;
+        width: 30%;
+      }
+      .dw-t-testimonial-text-wrapper {
+        flex: 1;
+        padding-left: 20px;
+      }
+    }
+    @keyframes circularSlide {
+      0% {
+        transform: translateX(0);
+      }
+      33.33% {
+        transform: translateX(-100%);
+      }
+      66.66% {
+        transform: translateX(-200%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+    {% if page.template_suffix == "im-eco-page-template" %}
+  .tw-heading {
+        font-family: Aristotelica Display Trial;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 48.76px;
+        text-align: center;
+        color: #000;
+      }
+      .dw-swiper-btn {
+        padding: 16px 24px;
+        background: #986835;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: ATCArquette;
+      }
+      .tw-body {
+        font-family: ATCArquette;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 33.32px;
+        color: #000;
+      }
+      .dw-t-testimonial-author {
+        font-family: ATCArquette;
+        font-size: 40px;
+        font-weight: 400;
+        line-height: 48.76px;
+        color: #000;
+      }
+        .dw-t-testimonial-author-designation{
+          font-family: ATCArquette;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 17.07px;
+        }
+        .tw-background {
+        background: {{ section.settings.custom_color_scheme.settings.background_gradient | default : section.settings.custom_color_scheme.settings.background }};
+      }
+      .tw-button {
+        background: #2A2A2A;
+        font-family: ATCArquette;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 26px;
+        color: #fff;
+      }
+       @media(max-width: 1086px){
+        .tw-heading{
+          font-size: 32px;
+          font-weight: 600;
+          line-height: 35.2px;
+        }
+        .dw-swiper-btn {
+        padding: unset;
+        background: #00000063;
+        }
+        .tw-body {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 22px;
+        text-align: center;
+      }
+        .dw-t-testimonial-author {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+        .dw-t-testimonial-author-designation{
+          display: none;
+        }
+      }
+  {% endif %}
+      {% if page.template_suffix == "dencrus-landing-page"  or request.page_type == "index" %}
+      .tw-heading {
+        font-family: ATCArquette;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 48.76px;
+        text-align: center;
+        color: #000;
+      }
+         .dw-swiper-btn {
+        padding: 16px 24px;
+        background: #000;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: ATCArquette;
+      }
+      .tw-body {
+        font-family: ATCArquette;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 33.32px;
+        color: #000;
+      }
+      .dw-t-testimonial-author {
+        font-family: ATCArquette;
+        font-size: 40px;
+        font-weight: 400;
+        line-height: 48.76px;
+        color: #000;
+      }
+        .dw-t-testimonial-author-designation{
+          font-family: ATCArquette;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 17.07px;
+        }
+      .tw-background {
+        background: {{ section.settings.custom_color_scheme.settings.background_gradient | default : section.settings.custom_color_scheme.settings.background }};
+      }
+      .tw-button {
+        background: #2A2A2A;
+        font-family: ATCArquette;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 26px;
+        color: #fff;
+      }
+        @media(max-width: 1086px){
+        .tw-heading{
+          font-size: 32px;
+          font-weight: 600;
+          line-height: 35.2px;
+        }
+        .dw-swiper-btn {
+        padding: unset;
+        background: #00000063;
+        }
+        .tw-body {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 22px;
+        text-align: center;
+      }
+        .dw-t-testimonial-author {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+        .dw-t-testimonial-author-designation{
+          display: none;
+        }
+      }
+      {% endif %}
+        {% if page.template_suffix == "shaveco-landing-page" %}
+      .tw-heading {
+        font-family: ATCArquette;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 48.76px;
+        text-align: center;
+        color: #517437;
+      }
+         .dw-swiper-btn {
+        padding: 16px 24px;
+        background: #000;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: ATCArquette;
+      }
+      .tw-body {
+        font-family: ATCArquette;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 33.32px;
+        color: #000;
+      }
+      .dw-t-testimonial-author {
+        font-family: ATCArquette;
+        font-size: 40px;
+        font-weight: 400;
+        line-height: 48.76px;
+        color: #000;
+      }
+        .dw-t-testimonial-author-designation{
+          font-family: ATCArquette;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 17.07px;
+        }
+      .tw-background {
+        background: {{ section.settings.custom_color_scheme.settings.background_gradient | default : section.settings.custom_color_scheme.settings.background }};
+      }
+      .tw-button {
+        background: #2A2A2A;
+        font-family: ATCArquette;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 26px;
+        color: #fff;
+      }
+          @media(max-width: 1086px){
+        .tw-heading{
+          font-size: 32px;
+          font-weight: 600;
+          line-height: 35.2px;
+        }
+        .dw-swiper-btn {
+        padding: unset;
+        background: #00000063;
+        }
+        .tw-body {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 22px;
+        text-align: center;
+      }
+        .dw-t-testimonial-author {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+        .dw-t-testimonial-author-designation{
+          display: none;
+        }
+      }
+      {% endif %}
+
+
+  }
+</style>
+
+<div class="dw-t-testimonials-section dw-mt">
+  <div class="dw-heading new-dw-heading tw-heading tw-center">
+    {{ section.settings.heading -}}
+  </div>
+  <div class="swiper-container swiper">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide">
+          <div class="dw-t-testimonial-content dw-testimonial-desktop">
+            <img
+              src="{{ block.settings.image | img_url: '400x' }}"
+              class="dw-t-testimonial-image"
+              alt="{{ block.settings.author_name }}"
+            >
+            <div class="dw-t-testimonial-text-wrapper">
+              <p class="dw-t-testimonial-text tw-body">{{ block.settings.testimonial }}</p>
+              <p class="dw-t-testimonial-author">{{ block.settings.author_name }}</p>
+              <p class="dw-t-testimonial-author-designation">{{ block.settings.author_designation }}</p>
+            </div>
+            <div class="dw-t-testimonial-colone-div">
+              <img
+                src="https://cdn.shopify.com/s/files/1/0895/7607/9667/files/bi_quote.png?v=1724417700"
+                class="dw-t-testimonial-colone"
+              >
+            </div>
+            <div class="dw-t-testimonial-overlay"></div>
+          </div>
+          <div class="dw-t-testimonial-content dw-testimonial-mobile">
+            <div class="dw-t-mobile-dib">
+              <div class="dw-t-img-div">
+                <img
+                  src="{{ block.settings.image | img_url: '80px' }}"
+                  class="dw-t-testimonial-image"
+                  alt="{{ block.settings.author_name }}"
+                >
+              </div>
+              <p class="dw-t-testimonial-author">{{ block.settings.author_name }}</p>
+            </div>
+            <div class="dw-t-testimonial-text-wrapper-a">
+              <p class="dw-t-testimonial-text tw-body">{{ block.settings.testimonial }}</p>
+            </div>
+            <div class="dw-t-testimonial-colone-div">
+              <picture>
+                <!-- Source for mobile -->
+                <source
+                  media="(max-width: 1079px)"
+                  srcset="https://cdn.shopify.com/s/files/1/0895/7607/9667/files/bi_quote.png?v=1724417700"
+                >
+
+                <!-- Source for desktop -->
+                <source
+                  media="(min-width: 1080px)"
+                  srcset="https://cdn.shopify.com/s/files/1/0895/7607/9667/files/bi_quote.png?v=1724417700"
+                >
+
+                <!-- Fallback image if no media query matches -->
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0895/7607/9667/files/bi_quote.png?v=1724417700"
+                  alt="Double Quotes"
+                >
+              </picture>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="swiper-button-prev dw-swiper-btn dw-testimonial-desktop">Previous</div>
+    <div class="swiper-button-next dw-swiper-btn dw-testimonial-desktop">Next</div>
+    <div class="swiper-button-prev dw-swiper-btn dw-testimonial-mobile">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path
+            d="M15 6L9 12L15 18"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </g>
+      </svg>
+    </div>
+    <div class="swiper-button-next dw-swiper-btn dw-testimonial-mobile">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g
+          id="SVGRepo_tracerCarrier"
+          stroke-linecap="round"
+          stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+          <path
+            d="M9 6L15 12L9 18"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </g>
+      </svg>
+    </div>
+    <div class="dw-t-testimonial-below">
+      <img src="https://cdn.shopify.com/s/files/1/0657/0075/7689/files/Testimonials.png?v=1715923361">
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var swipernew = new Swiper(".dw-t-testimonials-section .swiper-container", {
+        slidesPerView: 3,
+        centeredSlides: true,
+        loop: true,
+        navigation: {
+          nextEl: ".dw-t-testimonials-section .swiper-button-next",
+          prevEl: ".dw-t-testimonials-section .swiper-button-prev"
+        },
+         breakpoints: {
+            0: {
+                slidesPerView: 1,
+              spaceBetween: 40
+            },
+            990: {
+                slidesPerView: 3
+            }
+        },
+        on: {
+          slideChange: function () {
+            var activeIndex = this.activeIndex;
+            var slides = document.querySelectorAll(".dw-t-testimonial-text-wrapper");
+            slides.forEach(function (slide, index) {
+              if (index === activeIndex) {
+                slide.style.display = "block";
+              } else {
+                slide.style.display = "none";
+              }
+            });
+          }
+        }
+      });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "TW testimonial D5",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "heading"
+    },
+  {
+      "type": "range",
+      "label": "vertical padding",
+      "id": "vertical_padding",
+      "default": 16,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    }, {
+      "type": "range",
+      "label": "horizontal padding",
+      "id": "horizontal_padding",
+      "default": 16,
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonials",
+      "name": "Testimonials",
+      "settings": [
+        {
+          "type": "text",
+          "label": "testimonial",
+          "id": "testimonial"
+        }, {
+          "type": "text",
+          "label": "Author Name",
+          "id": "author_name"
+        },
+         {
+          "type": "text",
+          "label": "Author Designation",
+          "id": "author_designation"
+        },{
+          "type": "image_picker",
+          "label": "Image",
+          "id": "image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TW testimonial D5"
+    }
+  ]
+}
+{% endschema %}

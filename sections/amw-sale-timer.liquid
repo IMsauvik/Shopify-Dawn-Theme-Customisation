@@ -1,0 +1,636 @@
+<!-- sections/sale-timer.liquid -->
+{%- liquid
+  assign timer_enabled = section.settings.timer_enabled
+  assign end_date = section.settings.end_date
+  assign end_time = section.settings.end_time
+  assign timezone = section.settings.timezone | default: 'America/New_York'
+  
+  if end_date != blank and end_time != blank
+    assign full_end_datetime = end_date | append: 'T' | append: end_time | append: ':00'
+    assign end_timestamp = full_end_datetime | date: '%s'
+    assign current_timestamp = 'now' | date: '%s'
+    assign time_remaining = end_timestamp | minus: current_timestamp
+  endif
+-%}
+
+{%- if timer_enabled and time_remaining > 0 -%}
+<div class="sale-timer-wrapper" data-section-id="{{ section.id }}">
+  <div class="sale-timer" 
+       data-end-date="{{ full_end_datetime }}"
+       data-auto-hide="{{ section.settings.auto_hide_when_expired }}"
+       style="--timer-bg-color: {{ section.settings.background_color }};
+              --timer-text-color: {{ section.settings.text_color }};
+              --timer-accent-color: {{ section.settings.accent_color }};
+              --timer-button-bg: {{ section.settings.button_bg_color }};
+              --timer-button-text: {{ section.settings.button_text_color }};">
+    
+    <div class="sale-timer__container">
+      {%- if section.settings.timer_text != blank -%}
+        <div class="sale-timer__text">
+          {{ section.settings.timer_text }}
+        </div>
+      {%- endif -%}
+      
+      <div class="sale-timer__countdown" id="countdown-{{ section.id }}">
+        <div class="countdown-unit">
+          <span class="countdown-number" data-days>00</span>
+          <span class="countdown-label">{{ section.settings.days_label | default: 'Days' }}</span>
+        </div>
+        <div class="countdown-separator">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-hours>00</span>
+          <span class="countdown-label">{{ section.settings.hours_label | default: 'Hours' }}</span>
+        </div>
+        <div class="countdown-separator">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-minutes>00</span>
+          <span class="countdown-label">{{ section.settings.minutes_label | default: 'Min' }}</span>
+        </div>
+        <div class="countdown-separator">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-number" data-seconds>00</span>
+          <span class="countdown-label">{{ section.settings.seconds_label | default: 'Sec' }}</span>
+        </div>
+      </div>
+      
+      {%- if section.settings.button_text != blank and section.settings.button_url != blank -%}
+        <a href="{{ section.settings.button_url }}" class="sale-timer__button">
+          <span>{{ section.settings.button_text }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      {%- endif -%}
+    </div>
+    
+    {%- if section.settings.show_close_button -%}
+      <button class="sale-timer__close" aria-label="Close timer">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    {%- endif -%}
+  </div>
+</div>
+
+<style>
+.sale-timer-wrapper {
+  position: relative;
+  z-index: 1000;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sale-timer {
+  background: var(--timer-bg-color, #1a1a1a);
+  color: var(--timer-text-color, #ffffff);
+  padding: 12px 20px;
+  position: relative;
+  border-bottom: 2px solid var(--timer-accent-color, #ff6b35);
+  animation: slideDownBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.sale-timer.timer-hide {
+  animation: slideUpFade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.sale-timer__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px; /* Main gap between elements */
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+}
+
+.sale-timer__text {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.sale-timer__text::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--timer-accent-color, #ff6b35);
+  animation: underlineGrow 2s ease-in-out infinite;
+}
+
+/* --- START: Styles for OLD TIMER EFFECT --- */
+.sale-timer__countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Gap between units and separators */
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 50px; /* Old value */
+  background: rgba(255,255,255,0.1); /* Old background */
+  border-radius: 8px; /* Old border-radius */
+  padding: 8px 6px; /* Old padding */
+  backdrop-filter: blur(10px); /* Old filter */
+  border: 1px solid rgba(255,255,255,0.2); /* Old border */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Old shadow */
+}
+
+.countdown-number {
+  font-size: 28px; /* Old font size */
+  font-weight: 900; /* Old font weight */
+  line-height: 1;
+  color: var(--timer-accent-color, #ffff00); /* Uses new accent color, old default was #ffff00 */
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4); /* Old shadow */
+  font-family: 'Arial Black', Arial, sans-serif; /* Old font family */
+  position: relative; /* For flash animation positioning */
+}
+
+.countdown-number.flash { /* Keep the flash effect */
+  animation: numberFlash 0.5s ease-in-out;
+}
+
+.countdown-label {
+  font-size: 10px; /* Old font size */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px; /* Old margin */
+  opacity: 0.9; /* Old opacity */
+  font-weight: 600; /* Old font weight */
+}
+
+.countdown-separator {
+  font-size: 24px; /* Old font size */
+  font-weight: bold;
+  color: var(--timer-accent-color, #ffff00); /* Uses new accent color, old default was #ffff00 */
+  margin: 0 8px; /* Old margin */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Old shadow */
+  animation: blink 1s infinite; /* Old blink animation */
+}
+/* --- END: Styles for OLD TIMER EFFECT --- */
+
+
+.sale-timer__button {
+  background: var(--timer-button-bg, #ff6b35);
+  color: var(--timer-button-text, #ffffff);
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.sale-timer__button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.1);
+  transition: left 0.3s ease;
+}
+
+.sale-timer__button:hover::before {
+  left: 100%;
+}
+
+.sale-timer__button:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.sale-timer__button svg {
+  transition: transform 0.3s ease;
+}
+
+.sale-timer__button:hover svg {
+  transform: translateX(2px);
+}
+
+.sale-timer__close {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--timer-text-color, #ffffff);
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.sale-timer__close:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Animations */
+@keyframes slideDownBounce {
+  0% {
+    transform: translateY(-100%) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(5px) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    max-height: 100px;
+  }
+  100% {
+    transform: translateY(-100%) scale(0.8);
+    opacity: 0;
+    max-height: 0;
+  }
+}
+
+@keyframes blink { /* From old timer */
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+@keyframes numberFlash { /* From new timer, adapted */
+  0% { 
+    transform: scale(1);
+    /* background: transparent; */ /* Let unit background show */
+  }
+  50% { 
+    transform: scale(1.2);
+    /* background: var(--timer-accent-color, #ff6b35); */ /* Flash with accent or keep it subtle */
+    /* border-radius: 4px; */
+  }
+  100% { 
+    transform: scale(1);
+    /* background: transparent; */
+  }
+}
+/* For the text with underline */
+@keyframes underlineGrow {
+  0%, 100% { 
+    width: 100%;
+    opacity: 1;
+  }
+  50% { 
+    width: 60%;
+    opacity: 0.6;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sale-timer {
+    padding: 10px 15px;
+  }
+  
+  .sale-timer__container {
+    gap: 15px; /* Adjusted main gap */
+  }
+  
+  .sale-timer__text {
+    font-size: 12px; /* New smaller size */
+  }
+  
+  /* --- Responsive for OLD TIMER EFFECT --- */
+  .countdown-number {
+    font-size: 24px; /* Old responsive size */
+  }
+  
+  .countdown-label {
+    font-size: 9px; /* Old responsive size */
+  }
+  
+  .countdown-unit {
+    min-width: 45px; /* Old responsive size */
+    padding: 6px 4px; /* Old responsive padding */
+  }
+   /* --- END Responsive for OLD TIMER EFFECT --- */
+  
+  .sale-timer__button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sale-timer {
+    padding: 8px 12px;
+  }
+  
+  .sale-timer__container {
+    flex-direction: column;
+    gap: 10px; /* Adjusted main gap for column layout */
+  }
+  
+  .sale-timer__text {
+    font-size: 11px;
+    order: 1; /* New order for mobile */
+  }
+  
+  .sale-timer__countdown {
+    gap: 10px; /* Adjusted gap for units/separators */
+    order: 2; /* New order for mobile */
+  }
+  
+  .sale-timer__button {
+    order: 3;
+        padding: 1px 45px;
+
+  }
+  
+  /* --- Responsive for OLD TIMER EFFECT --- */
+  .countdown-separator {
+    display: none; /* Old: Hide separator on smallest screens */
+  }
+  
+  .sale-timer__countdown {
+    gap: 12px; /* Old: Gap when separators hidden */
+  }
+  
+  .countdown-unit {
+    min-width: 40px; /* Old responsive size */
+  }
+  
+  .countdown-number {
+    font-size: 16px; /* Old responsive size */
+  }
+  /* --- END Responsive for OLD TIMER EFFECT --- */
+  
+  .sale-timer__close {
+    right: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Adjustments for very small screens if needed, mostly handled by above */
+  .sale-timer__countdown {
+    gap: 8px; /* Further reduce gap if needed */
+  }
+  
+  .countdown-unit {
+    min-width: 35px;
+    padding: 4px 3px;
+  }
+  
+  .countdown-number {
+    font-size: 20px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const timers = document.querySelectorAll('.sale-timer');
+  
+  timers.forEach(timer => {
+    const endDate = timer.getAttribute('data-end-date');
+    const autoHide = timer.getAttribute('data-auto-hide') === 'true';
+    const countdown = timer.querySelector('[id^="countdown-"]');
+    
+    if (!endDate || !countdown) return;
+    
+    const targetTime = new Date(endDate).getTime();
+    
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const timeLeft = targetTime - now;
+      
+      if (timeLeft <= 0) {
+        if (autoHide) {
+          hideTimer(timer);
+        } else {
+          resetCountdown();
+        }
+        // clearInterval(intervalId); // Clear interval when timer ends
+        return;
+      }
+      
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      updateWithFlash(countdown.querySelector('[data-days]'), String(days).padStart(2, '0'));
+      updateWithFlash(countdown.querySelector('[data-hours]'), String(hours).padStart(2, '0'));
+      updateWithFlash(countdown.querySelector('[data-minutes]'), String(minutes).padStart(2, '0'));
+      updateWithFlash(countdown.querySelector('[data-seconds]'), String(seconds).padStart(2, '0'));
+    }
+    
+    function updateWithFlash(element, newValue) {
+      if (element.textContent !== newValue) {
+        // Only add flash if the element exists and its content changes
+        if(element) {
+            element.classList.add('flash');
+            element.textContent = newValue;
+            setTimeout(() => element.classList.remove('flash'), 500); // Matches old CSS animation duration for flash
+        }
+      }
+    }
+    
+    function resetCountdown() {
+      ['[data-days]', '[data-hours]', '[data-minutes]', '[data-seconds]'].forEach(selector => {
+        const el = countdown.querySelector(selector);
+        if (el) el.textContent = '00';
+      });
+    }
+    
+    function hideTimer(timerElement) {
+      timerElement.classList.add('timer-hide');
+      setTimeout(() => {
+        if (timerElement.parentElement) {
+          timerElement.parentElement.style.display = 'none';
+        }
+      }, 600); // Matches slideUpFade animation duration
+    }
+    
+    // Close button functionality
+    const closeButton = timer.querySelector('.sale-timer__close');
+    if (closeButton) {
+      closeButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideTimer(timer);
+        sessionStorage.setItem('saleTimerHidden', 'true');
+      });
+    }
+    
+    // Check if timer was previously hidden
+    if (sessionStorage.getItem('saleTimerHidden') === 'true') {
+      if (timer.parentElement) {
+          timer.parentElement.style.display = 'none';
+      }
+      return;
+    }
+    
+    // Start countdown
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 1000); // Store interval ID to clear it later
+  });
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Sale Timer",
+  "tag": "section",
+  "class": "sale-timer-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Timer Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "timer_enabled",
+      "label": "Enable timer",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "timer_text",
+      "label": "Timer text",
+      "default": "🔥 Flash Sale Ends In"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date (YYYY-MM-DD)",
+      "info": "Format: 2024-12-31"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time (HH:MM)",
+      "info": "24-hour format: 23:59",
+      "default": "23:59"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_hide_when_expired",
+      "label": "Auto-hide when expired",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close_button",
+      "label": "Show close button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Sale"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link",
+      "info": "Link to collection, product, or any page"
+    },
+    {
+      "type": "header",
+      "content": "Labels"
+    },
+    {
+      "type": "text",
+      "id": "days_label",
+      "label": "Days label",
+      "default": "Days"
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "Hours label",
+      "default": "Hours"
+    },
+    {
+      "type": "text",
+      "id": "minutes_label",
+      "label": "Minutes label",
+      "default": "Min"
+    },
+    {
+      "type": "text",
+      "id": "seconds_label",
+      "label": "Seconds label",
+      "default": "Sec"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color (numbers, separators, underlines)",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button background",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Timer"
+    }
+  ]
+}
+{% endschema %}

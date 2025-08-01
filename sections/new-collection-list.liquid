@@ -1,0 +1,140 @@
+<style>
+  .collection-list-section {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .collection-list-section p {
+    font-size: 16px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .collection-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    justify-items: center;
+  }
+
+  .collection-item {
+    text-align: center;
+    width: 100%;
+  }
+
+  .collection-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+  }
+
+  .collection-item h3 {
+    font-size: 20px;
+    margin: 10px 0 5px;
+    font-weight: 600;
+    font-family: 'Raleway-Bold';
+  }
+
+  .collection-item p {
+    font-size: 14px;
+    color: #555;
+    font-family: 'Raleway-Regular';
+    margin-top: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .collection-items {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+
+    .collection-item h3 {
+      font-size: 16px;
+      margin: 10px 0 5px;
+      font-weight: 600;
+    }
+
+    .collection-item p {
+      font-size: 12px;
+      margin: 2px 0;
+    }
+  }
+</style>
+
+<div class="collection-list-section scroll-trigger animate--slide-in page-width">
+  <h2 class="dw-heading-special" style="margin-bottom: 25px;">
+    {{ section.settings.add_heading }}
+  </h2>
+  <p>{{ section.settings.add_subheading }}</p>
+
+  <div class="collection-items">
+    {% for block in section.blocks %}
+      <div class="collection-item">
+        <a href="{{ block.settings.connect_the_collection.url }}">
+          <img
+            class="lazy"
+            data-src="{{ block.settings.add_collection_image | image_url: width: 350 }}"
+            data-width="{{ block.settings.add_collection_image.width }}"
+            data-height="{{ block.settings.add_collection_image.height }}"
+            alt="{{ block.settings.heading_below_image | escape }}"
+          >
+        </a>
+        <h3>{{ block.settings.heading_below_image }}</h3>
+        <p>{{ block.settings.subheading_below_image }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "New Collection List",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Add Heading",
+      "id": "add_heading"
+    },
+    {
+      "type": "text",
+      "label": "Add Subheading",
+      "id": "add_subheading"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "add_slide",
+      "name": "Add Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Add Collection Image",
+          "id": "add_collection_image"
+        },
+        {
+          "type": "collection",
+          "label": "Connect the Collection",
+          "id": "connect_the_collection"
+        },
+        {
+          "type": "text",
+          "label": "Heading below image",
+          "id": "heading_below_image"
+        },
+        {
+          "type": "text",
+          "label": "Subheading below image",
+          "id": "subheading_below_image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Collection List"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,183 @@
+<style>
+  .about-us-founder-section {
+    text-align: center;
+  }
+
+  .dw-heading-special-about {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: normal;
+    text-align: center;
+    color: #000;
+    margin-bottom: 18px;
+    margin-top: 22px;
+  }
+
+  .founder-paragraph {
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #000;
+    text-align: center;
+    line-height: normal;
+    width: 60%;
+    margin: auto;
+  }
+
+  .founder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Show 3 columns on desktop */
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .founder-item {
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .founder-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 17px;
+  }
+
+  .founder-overlay {
+    position: absolute;
+    bottom: 11%;
+    left: 0;
+    right: 0;
+    background: #c8c8c8;
+    color: #000000a8;
+    padding: 7px;
+    font-size: 18px;
+    border-radius: 2px 0px 17px 17px;
+    letter-spacing: 0;
+  }
+
+  .founder-name {
+    margin-top: 27px;
+    font-size: 19px;
+    font-weight: bold;
+    color: #000;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .founder-grid {
+      display: flex; /* Switch to flex layout for scrolling */
+      overflow-x: auto; /* Enable horizontal scrolling on mobile */
+      gap: 10px;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 15px; /* Adds space for scrollbar */
+    }
+
+    .founder-item {
+      flex: 0 0 50%; /* Each card takes up 50% of the viewport */
+      scroll-snap-align: start;
+    }
+
+    .dw-heading-special-about {
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    .founder-paragraph {
+      font-size: 15px;
+      width: 90%;
+    }
+
+    .founder-overlay {
+      bottom: 26%;
+      font-size: 15px;
+    }
+    .founder-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    scroll-snap-type: x mandatory;
+    /* padding-bottom: 15px; */
+    margin-bottom: 0;
+    width: 98%;
+}
+    .founder-overlay {
+
+    padding: 2px;
+
+}
+    .founder-name {
+    margin-top: 27px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+}
+  }
+</style>
+
+
+
+
+<div class="about-us-founder-section">
+  <h2 class="dw-heading-special-about">{{ section.settings.add_heading }}</h2>
+
+  <div class="founder-grid page-width">
+    {% for block in section.blocks %}
+      <div class="founder-item">
+        <img src="{{ block.settings.founder_image | image_url }}" alt="Founder Image">
+        <div class="founder-overlay">{{ block.settings.designation }}</div>
+        <p class="founder-name">{{ block.settings.founder_name }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <p class="founder-paragraph">{{ section.settings.add_paragraph }}</p>
+</div>
+
+{% schema %}
+{
+  "name": "About Us Founder Sections",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Add Heading",
+      "id": "add_heading"
+    },
+    {
+      "type": "text",
+      "label": "Add paragraph",
+      "id": "add_paragraph"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "add_founders",
+      "name": "Add Founders",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Founder Image",
+          "id": "founder_image"
+        },
+        {
+          "type": "text",
+          "label": "Designation",
+          "id": "designation"
+        },
+        {
+          "type": "text",
+          "label": "Founder Name",
+          "id": "founder_name"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Us Founder Sections"
+    }
+  ]
+}
+{% endschema %}

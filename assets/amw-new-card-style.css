@@ -1,0 +1,372 @@
+.custom-badge-image {
+    position: absolute;
+    top: 0px;
+    left: 7px;
+}
+@media(max-width:768px){
+   .custom-badge-image img {
+      width:40px !important;
+   }
+}
+
+.card__content-custom {
+    padding: 0;
+    justify-content: space-between
+}
+
+.card_review_container {
+    display: flex;
+    gap: 10px;
+    padding-bottom: 8px
+}
+
+.amw-price-container {
+    font-family: Helvetica;
+    font-size: 18px;
+    font-weight: 900;
+    text-align: left;
+    line-height: normal;
+    color: #44a30d
+}
+
+.count-container,
+.star-container {
+    font-family: Helvetica;
+    font-size: 10px;
+    text-align: left;
+    display: flex;
+    font-weight: 900
+}
+
+.star-container {
+    background: #0f2e16;
+    color: #fff;
+    padding: 0 6px;
+    align-items: center;
+    justify-content: center
+}
+
+.count-container {
+    border: 1px solid #0f2e16;
+    padding: 2px 5px;
+    align-items: center
+}
+
+.count-container svg path {
+    fill: #0f2e16
+}
+
+.custom-card-title {
+    font-family: Raleway-Bold;
+    font-size: 12px;
+    line-height: normal;
+    text-align: left;
+    color: #0f2e16;
+    padding-top: 4px
+}
+
+.card__information {
+    padding-inline: 9px
+}
+
+.product-grid li {
+    display: flex
+}
+
+.amw-new-buy-btn {
+    color: #fff;
+    text-transform: uppercase;
+    font-family: Raleway-Bold;
+    font-size: 15px;
+    border-radius: 8px;
+    border: none;
+    background: #0f2e16
+}
+
+.amw-new-buy-btn:hover {
+    background: #0f2e16;
+    border: none
+}
+
+.custom-card-title-mob,
+.product_sub_title_mob {
+    display: none
+}
+
+.amw-com-price-container {
+    text-decoration: line-through;
+    color: #888;
+    margin-right: 8px;
+    font-family: Helvetica;
+    font-size: 13px;
+    font-weight: 900
+}
+
+.awm-card-sold-out,
+.discount_container_comb_card {
+    font-size: 15px;
+   font-family: Helvetica;
+}
+
+
+
+.card__badge {
+    position: absolute;
+    top: 0;
+    right: 5px
+}
+
+.amw-new-buy-btn:hover:after {
+    --border-offset: unset !important;
+    box-shadow: unset !important
+}
+
+.product_sub_title {
+    font-size: 10px;
+    color: #969696;
+    margin: 4px 0;
+    font-weight: 900;
+    font-family: Raleway-Bold
+}
+
+@media(max-width:768px) {
+    .discount_container_comb_card {
+        font-family: Helvetica;
+        font-size: 12px
+    }
+    .amw-com-price-container {
+        font-size: 10px
+    }
+    .amw-new-buy-btn {
+        font-size: 14px
+    }
+    .amw-price-container {
+        font-size: 13px;
+        font-weight: 900
+    }
+    .custom-card-title-desk,
+    .product_sub_title_desk {
+        display: none
+    }
+    .custom-card-title-mob,
+    .product_sub_title_mob {
+        display: block
+    }
+}
+
+/* Clean Two-line Mobile, Tight One-line Desktop */
+
+.modern-price-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 1px 0;
+  width: 100%;
+}
+
+/* Main price row */
+.price-main-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: fit-content;
+}
+
+/* Discount row */
+.price-discount-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.amw-price-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #44a30d, #2d6a08);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.amw-price-container::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #44a30d, #2d6a08);
+  transition: width 0.3s ease;
+}
+
+.amw-price-container:hover::after {
+  width: 100%;
+}
+
+.amw-com-price-container {
+  text-decoration: line-through !important;
+  color: #a0aec0 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.discount_container_comb_card {
+    background: linear-gradient(135deg, #f2f8f1, #0f2e1626) !important;
+    color: #0f2e16!important;
+    padding: 2px 4px!important;
+    border-radius: 5px!important;
+    font-size: 13px!important;
+    font-weight: 700!important;
+    font-family: Inter,-apple-system,BlinkMacSystemFont,sans-serif!important;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border: 1px solid rgba(15,46,22,.2)!important;
+    position: relative;
+    flex-shrink: 0;
+    animation: soothing-pulse 3s ease-in-out infinite;
+    transition: all .4s cubic-bezier(.25,.46,.45,.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px #0f2e1626;
+    overflow: hidden;
+}
+
+/* Soothing pulse animation */
+@keyframes soothing-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(15, 46, 22, 0.15);
+    background: linear-gradient(135deg, rgba(15, 46, 22, 0.1), rgba(15, 46, 22, 0.15));
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(15, 46, 22, 0.25);
+    background: linear-gradient(135deg, rgba(15, 46, 22, 0.15), rgba(15, 46, 22, 0.2));
+  }
+}
+
+/* Floating shimmer effect */
+.discount_container_comb_card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: gentle-shimmer 4s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+@keyframes gentle-shimmer {
+  0%, 10% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    left: 100%;
+    opacity: 1;
+  }
+   100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.discount_container_comb_card:hover {
+  color: #0f2e16 !important;
+  background: linear-gradient(135deg, rgba(15, 46, 22, 0.2), rgba(15, 46, 22, 0.25)) !important;
+  transform: scale(1.05) translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 46, 22, 0.3);
+  animation: soothing-hover 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes soothing-hover {
+  0% {
+    box-shadow: 0 6px 20px rgba(15, 46, 22, 0.3);
+  }
+  100% {
+    box-shadow: 0 8px 25px rgba(15, 46, 22, 0.4);
+  }
+}
+
+/* Mobile styles - Two lines */
+@media (max-width: 767px) {
+  .modern-price-wrapper {
+    gap: 3px;
+  }
+  
+  .price-main-row {
+    gap: 6px;
+  }
+  
+  .amw-price-container {
+    font-size: 16px !important;
+  }
+  
+  .amw-com-price-container {
+    font-size: 12px !important;
+  }
+  
+  .discount_container_comb_card {
+    font-size: 12px !important;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 320px) {
+  .amw-price-container {
+    font-size: 15px !important;
+  }
+  
+  .amw-com-price-container {
+    font-size: 11px !important;
+  }
+  
+  .discount_container_comb_card {
+    font-size: 11px !important;
+  }
+}
+
+/* Desktop styles - Single line with tight spacing */
+@media (min-width: 768px) {
+  .modern-price-wrapper {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .price-main-row {
+    gap: 8px;
+  }
+  
+  .price-discount-row {
+    display: contents;
+  }
+  
+  .amw-price-container {
+    font-size: 18px !important;
+  }
+  
+  .amw-com-price-container {
+    font-size: 14px !important;
+  }
+  
+  .discount_container_comb_card {
+    font-size: 12px !important;
+  }
+}
+.restock-alerts-notify-button{
+  margin-top:0;
+}
+.quick-add{
+   margin-top:0 !important;
+}

@@ -1,0 +1,149 @@
+<!-- Minimal Elegant Holi Effect - Highly Reliable -->
+<style>
+    .holi-minimal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none !important;
+        z-index: 9999 !important;
+        overflow: hidden !important;
+    }
+    
+    .holi-minimal:after {
+        content: " " !important;
+        display: block !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0.01 !important;
+    }
+    
+    .holi-dot {
+        position: absolute !important;
+        border-radius: 50% !important;
+        background-color: #ff3366 !important;
+        pointer-events: none !important;
+    }
+</style>
+
+<script>
+    // Simple and reliable Holi effect
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create container
+        var container = document.createElement('div');
+        container.className = 'holi-minimal';
+        document.body.appendChild(container);
+        
+        // Colors - bright Holi colors
+        var colors = ['#ff3366', '#ff6633', '#ffcc33', '#33cc33', '#3366ff', '#cc33ff'];
+        
+        // Create dot
+        function createDot(x, y, size, color) {
+            var dot = document.createElement('div');
+            dot.className = 'holi-dot';
+            dot.style.width = size + 'px';
+            dot.style.height = size + 'px';
+            dot.style.left = (x - size/2) + 'px';
+            dot.style.top = (y - size/2) + 'px';
+            dot.style.backgroundColor = color;
+            dot.style.opacity = '0';
+            
+            // Make dot visible in Shopify
+            dot.innerHTML = ' ';
+            
+            container.appendChild(dot);
+            
+            // Animation using JS instead of CSS transitions
+            var opacity = 0;
+            var scale = 0.1;
+            var startTime = Date.now();
+            var duration = 1500; // 1.5 seconds
+            
+            function animate() {
+                var elapsed = Date.now() - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                
+                if (progress < 0.5) {
+                    // First half - grow and fade in
+                    opacity = progress * 2 * 0.8; // max opacity 0.8
+                    scale = 0.1 + progress * 1.8; // scale from 0.1 to 1.0
+                } else {
+                    // Second half - keep growing and fade out
+                    opacity = (1 - (progress - 0.5) * 2) * 0.8;
+                    scale = 1.0 + (progress - 0.5) * 1.0; // scale from 1.0 to 1.5
+                }
+                
+                dot.style.opacity = opacity;
+                dot.style.transform = 'scale(' + scale + ')';
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Remove dot when animation is complete
+                    container.removeChild(dot);
+                }
+            }
+            
+            // Start animation
+            requestAnimationFrame(animate);
+        }
+        
+        // Create random dot splash
+        function createRandomSplash(centerX, centerY) {
+            var color = colors[Math.floor(Math.random() * colors.length)];
+            var splashSize = Math.random() * 10 + 20; // 20-30px
+            
+            // Create center dot
+            createDot(centerX, centerY, splashSize, color);
+            
+            // Create surrounding dots
+            var dotCount = 5 + Math.floor(Math.random() * 5); // 5-10 dots
+            
+            for (var i = 0; i < dotCount; i++) {
+                setTimeout(function() {
+                    var angle = Math.random() * Math.PI * 2;
+                    var distance = Math.random() * 50 + 10;
+                    var x = centerX + Math.cos(angle) * distance;
+                    var y = centerY + Math.sin(angle) * distance;
+                    var size = Math.random() * 5 + 5; // 5-10px
+                    
+                    createDot(x, y, size, color);
+                }, i * 100); // stagger creation
+            }
+        }
+        
+        // Add click/touch handler
+        document.addEventListener('click', function(e) {
+            if (!['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(e.target.tagName)) {
+                createRandomSplash(e.clientX, e.clientY);
+            }
+        });
+        
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 0) {
+                var touch = e.touches[0];
+                createRandomSplash(touch.clientX, touch.clientY);
+            }
+        });
+        
+        // Create random splashes periodically
+        function createRandomBackgroundSplash() {
+            var x = Math.random() * window.innerWidth;
+            var y = Math.random() * (window.innerHeight / 2);
+            
+            createRandomSplash(x, y);
+            
+            setTimeout(createRandomBackgroundSplash, 2000 + Math.random() * 2000);
+        }
+        
+        // Initial splash
+        setTimeout(function() {
+            var x = window.innerWidth / 2;
+            var y = window.innerHeight / 3;
+            createRandomSplash(x, y);
+            
+            setTimeout(createRandomBackgroundSplash, 1500);
+        }, 1000);
+    });
+</script>

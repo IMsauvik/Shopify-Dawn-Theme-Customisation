@@ -1,0 +1,156 @@
+{% comment %}
+  Blog Image Block Section
+  Displays multiple blog image blocks with linked images from blog post metafields
+{% endcomment %}
+  {% if article and article.metafields.custom.select_the_respective_metaobject != blank %}
+<div class="blog-image-blocks page-width page-width--narrow">
+  {% if article and article.metafields.custom.select_the_respective_metaobject != blank %}
+    <div class="blog-image-grid">
+      {% for blog_block in article.metafields.custom.select_the_respective_metaobject.value %}
+        <div class="blog-image-item">
+          {% if blog_block.add_image_link != blank and blog_block.add_image != blank %}
+            <a href="{{ blog_block.add_image_link }}" class="blog-image-link">
+              <img 
+                src="{{ blog_block.add_image | img_url: '600x400' }}" 
+                alt="{{ blog_block.add_image.alt | default: 'Blog image' }}"
+                class="blog-image"
+                loading="lazy"
+              >
+            </a>
+          {% elsif blog_block.add_image != blank %}
+            <img 
+              src="{{ blog_block.add_image | img_url: '600x400' }}" 
+              alt="{{ blog_block.add_image.alt | default: 'Blog image' }}"
+              class="blog-image"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% elsif section.settings.blog_image_blocks != blank %}
+    <div class="blog-image-grid">
+      {% for blog_block in section.settings.blog_image_blocks %}
+        <div class="blog-image-item">
+          {% if blog_block.add_image_link != blank and blog_block.add_image != blank %}
+            <a href="{{ blog_block.add_image_link }}" class="blog-image-link">
+              <img 
+                src="{{ blog_block.add_image | img_url: '600x400' }}" 
+                alt="{{ blog_block.add_image.alt | default: 'Blog image' }}"
+                class="blog-image"
+                loading="lazy"
+              >
+            </a>
+          {% elsif blog_block.add_image != blank %}
+            <img 
+              src="{{ blog_block.add_image | img_url: '600x400' }}" 
+              alt="{{ blog_block.add_image.alt | default: 'Blog image' }}"
+              class="blog-image"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="blog-image-placeholder">
+      <p>No blog image blocks found</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+
+  .blog-image-blocks{
+     padding: 33px 0px;
+  }
+  .blog-image-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    align-items: start;
+  }
+
+  .blog-image-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .blog-image-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .blog-image-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .blog-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .blog-image-link:hover .blog-image {
+    transform: scale(1.05);
+  }
+
+  .blog-image-placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 18px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .blog-image-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: auto;
+    width: 83%;
+}
+    
+    .blog-image-blocks {
+      padding: 30px 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .blog-image-blocks {
+      padding: 20px 10px;
+    }
+  }
+</style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Blog Image Blocks",
+  "tag": "section",
+  "class": "blog-image-blocks-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "This section automatically displays blog image blocks from the current blog post's metafields. If no blog post context is available, you can manually select blog image blocks below."
+    },
+    {
+      "type": "metaobject_list",
+      "id": "blog_image_blocks",
+      "label": "Fallback Blog Image Blocks (Optional)",
+      "metaobject_type": "blog_image_block",
+      "info": "These will only be used if no blog post metafields are found"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Image Blocks"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,329 @@
+<style>
+  .featured-collection-section {
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.section-header {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.featured-collection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.banner-container {
+  width: 100%;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.desktop-banner {
+  display: none;
+}
+
+.mobile-banner {
+  display: block;
+}
+
+.products-slider-container {
+  width: 100%;
+}
+
+.swiper-slide {
+  height: auto;
+}
+
+.swiper-navigation-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.featured-collection-section .swiper-button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.swiper-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f4f4f4;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.swiper-button:hover {
+  background-color: #e0e0e0;
+}
+
+.swiper-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.swiper-scrollbar {
+  flex: 1;
+  height: 6px;
+  background-color: #f4f4f4;
+  border-radius: 3px;
+  position: relative;
+}
+
+.view-all-container {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.view-all-button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.view-all-button:hover {
+  background-color: #333;
+}
+
+.placeholder-collection {
+  padding: 40px;
+  text-align: center;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+}
+
+@media screen and (min-width: 768px) {
+  .featured-collection-container {
+    flex-direction: row;
+  }
+  
+  .banner-container {
+    width: 30%;
+  }
+  
+  .products-slider-container {
+    width: 70%;
+  }
+  
+  .desktop-banner {
+    display: block;
+  }
+  
+  .mobile-banner {
+    display: none;
+  }
+  
+  .section-title {
+    font-size: 28px;
+  }
+}
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.css" />
+
+
+
+<div class="featured-collection-section">
+  <div class="page-width">
+    {% if section.settings.title != blank %}
+      <div class="section-header text-center">
+        <h2 class="section-title">{{ section.settings.title | escape }}</h2>
+      </div>
+    {% endif %}
+    
+    <div class="featured-collection-container">
+      <div class="banner-container">
+        <div class="desktop-banner">
+          {% if section.settings.desktop_banner != blank %}
+            {{ section.settings.desktop_banner | image_url: width: 600 | image_tag: 
+              loading: 'lazy',
+              class: 'banner-image desktop-only',
+              alt: section.settings.title
+            }}
+          {% else %}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg banner-image desktop-only' }}
+          {% endif %}
+        </div>
+        <div class="mobile-banner">
+          {% if section.settings.mobile_banner != blank %}
+            {{ section.settings.mobile_banner | image_url: width: 400 | image_tag: 
+              loading: 'lazy',
+              class: 'banner-image mobile-only',
+              alt: section.settings.title
+            }}
+          {% else %}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg banner-image mobile-only' }}
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="products-slider-container">
+        {% assign collection = collections[section.settings.collection] %}
+        {% if collection != blank %}
+          <div class="swiper featured-collection-swiper">
+            <div class="swiper-wrapper">
+              {% for product in collection.products limit: section.settings.products_to_show %}
+                <div class="swiper-slide">
+                  {% render 'amw-new-card',
+                    card_product: product,
+                    show_vendor: section.settings.show_vendor,
+                    media_aspect_ratio: section.settings.image_ratio,
+                    show_rating: section.settings.show_rating
+                  %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="swiper-navigation-container">
+            <div class="swiper-button-container">
+              <button class="swiper-button swiper-button-prev swiper-button-prev-{{ section.index }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M19 12H5"></path>
+  <path d="M12 19l-7-7 7-7"></path>
+</svg>
+
+              </button>
+              <button class="swiper-button swiper-button-next swiper-button-next-{{ section.index }}">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 12h14"></path>
+  <path d="M12 5l7 7-7 7"></path>
+</svg>
+
+              </button>
+            </div>
+            <div class="swiper-scrollbar"></div>
+          </div>
+          
+         
+            <div class="view-all-container">
+              <a href="{{ collection.url }}" class="button view-all-button">
+                {{ section.settings.view_all_text | escape }}
+              </a>
+            </div>
+         
+        {% else %}
+          <div class="placeholder-collection">
+            <p>Please select a collection in the section settings</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const swiper = new Swiper('.featured-collection-swiper', {
+      slidesPerView: 2,
+      spaceBetween: 10,
+      navigation: {
+        nextEl: '.swiper-button-next-{{ section.index }}',
+        prevEl: '.swiper-button-prev-{{ section.index }}',
+      },
+      scrollbar: {
+        el: '.swiper-scrollbar',
+        draggable: true,
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 4,
+          spaceBetween: 20
+        }
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Custom Featured Col",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Featured Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_banner",
+      "label": "Desktop Banner Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_banner",
+      "label": "Mobile Banner Image"
+    },
+    {
+      "type": "select",
+      "id": "products_to_show",
+      "label": "Number of Products",
+      "options": [
+        {
+          "value": "4",
+          "label": "4"
+        },
+        {
+          "value": "8",
+          "label": "8"
+        },
+        {
+          "value": "12",
+          "label": "12"
+        }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show View All Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "View All Text",
+      "default": "View All"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Featured Col",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,334 @@
+<style>
+#shopify-section-{{ section.id }} {
+  .featured-coll.swiper-button-next {
+    z-index: 1;
+  }
+
+  .featured-coll.swiper-button-prev {
+    z-index: 1;
+  }
+  
+  .dw-collection-list-parent {
+    position: relative;
+    padding-block: 25px;
+    padding-top: 0;
+  }
+  
+  .dw-collection-item img {
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 10px;
+  }
+  
+  .dw-collection-wrapper {
+    display: flex;
+    width: 70%;
+    margin-inline: auto;
+    gap: 50px;
+  }
+  
+  .swiper-button-prev:after {
+    content: unset;
+  }
+  
+  .swiper-button-next:after {
+    content: unset;
+  }
+
+  /* Add proper class for heading */
+  .dw-heading-special {
+    font-family: Raleway-Bold, Arial, sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 48.76px;
+    text-align: center;
+    color: #000;
+    margin-bottom: 43px;
+  }
+
+  .dw-c-btn {
+    font-size: 18px;
+    line-height: 21.94px;
+    color: #000;
+    font-family: Raleway-Regular, Arial, sans-serif;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .dw-c-title {
+    font-family: Raleway-Regular, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 23px;
+    text-align: left;
+    color: #2A2A2A;
+    margin-top: 8px;
+  }
+
+  .dw-c-sub-title {
+    font-family: Raleway-Regular, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16.1px;
+    text-align: left;
+    color: #515151;
+    margin-block: 12px;
+  }
+
+  .icon-wrap {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  @media only screen and (max-width: 768px) {
+    .dw-collection-wrapper {
+      width: 90%;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .dw-collection-list {
+      width: 90%;
+      margin-inline: auto;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .dw-collection-list-parent {
+      padding-block: 18px;
+      padding-bottom: 0;
+    }
+
+    .dw-heading-special {
+      font-size: 22px;
+      line-height: 26.82px;
+      margin-bottom: 19px;
+    }
+  }
+
+  /* Template-specific styles */
+  {% if page.template_suffix == "im-eco-page-template" %}
+    .dw-heading-special {
+      color: #986835;
+      font-size: 40px;
+      line-height: 44px;
+    }
+    
+    .dw-c-btn {
+      font-size: 16px;
+      line-height: 24px;
+      color: #986835;
+      font-weight: 400;
+    }
+
+    @media (max-width: 768px) {
+      .dw-heading-special {
+        font-size: 32px;
+        line-height: 35.2px;
+      }
+      
+      .dw-c-btn {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 16.1px;
+      }
+    }
+  {% endif %}
+
+  {% if request.page_type == "index" or page.template_suffix == "dencrus-landing-page" %}
+    .dw-heading-special {
+      color: #000;
+    }
+
+    @media (max-width: 768px) {
+      .dw-heading-special {
+        font-size: 22px;
+        line-height: 26.82px;
+      }
+    }
+  {% endif %}
+
+  {% if page.template_suffix == "shaveco-landing-page" %}
+    .dw-heading-special {
+      color: #517437;
+    }
+    
+    .dw-c-btn {
+      color: #517437;
+    }
+
+    @media (max-width: 768px) {
+      .dw-heading-special {
+        font-size: 22px;
+        line-height: 26.82px;
+      }
+    }
+  {% endif %}
+}
+</style>
+
+<div class="dw-collection-list-parent page-width">
+  <div class="dw-collection-list dw-mt dw-mb featured-swiper-container-{{ section.id }}">
+    {% if section.settings.heading != blank %}
+      <h2 class="dw-heading-special">{{ section.settings.heading }}</h2>
+    {% endif %}
+    
+    <div class="swiper-wrapper" style="padding-top:20px;">
+      {% for block in section.blocks %}
+        <div class="dw-collection-item swiper-slide">
+          {% if block.settings.image != blank %}
+            <img src="{{ block.settings.image | image_url: width: 400 }}" 
+                 alt="{{ block.settings.title | escape }}" 
+                 loading="lazy">
+          {% endif %}
+          
+          {% if block.settings.title != blank %}
+            <div class="dw-c-title">{{ block.settings.title }}</div>
+          {% endif %}
+          
+          {% if block.settings.sub_title != blank %}
+            <p class="dw-c-sub-title">{{ block.settings.sub_title }}</p>
+          {% endif %}
+          
+          {% if block.settings.button_url != blank %}
+            <a href="{{ block.settings.button_url }}" class="dw-c-btn">
+              SHOP NOW
+              {% if request.page_type == 'index' or page.template_suffix == "dencrus-landing-page" %}
+                <span class="icon-wrap">&nbsp;
+                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.59 1.41L5.17 6L0.59 10.59L2 12L8 6L2 -2.62268e-07L0.59 1.41Z" 
+                          fill="{% if page.template_suffix == 'dencrus-landing-page' %}#000{% else %}#986835{% endif %}"/>
+                  </svg>
+                </span>
+              {% elsif page.template_suffix == "shaveco-landing-page" %}
+                <span class="icon-wrap">&nbsp;
+                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.59 1.41L5.17 6L0.59 10.59L2 12L8 6L2 -2.62268e-07L0.59 1.41Z" 
+                          fill="#517437"/>
+                  </svg>
+                </span>
+              {% elsif page.template_suffix == "im-eco-page-template" %}
+                <span class="icon-wrap">&nbsp;
+                  <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.59 1.41L5.17 6L0.59 10.59L2 12L8 6L2 -2.62268e-07L0.59 1.41Z" 
+                          fill="#986835"/>
+                  </svg>
+                </span>
+              {% endif %}
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <div class="featured-coll swiper-button-next swiper-button-next-{{ section.id }}">  
+    <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="15.5" cy="15.5" r="15.5" transform="matrix(-1 0 0 1 31 0)" fill="#D9D9D9"/>
+      <path d="M12.59 20.59L17.17 16L12.59 11.41L14 10L20 16L14 22L12.59 20.59Z" fill="#2A2A2A"/>
+    </svg>
+  </div>
+  
+  <div class="featured-coll swiper-button-prev swiper-button-prev-{{ section.id }}">
+    <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="15.5" cy="15.5" r="15.5" fill="#D9D9D9"/>
+      <path d="M18.41 20.59L13.83 16L18.41 11.41L17 10L11 16L17 22L18.41 20.59Z" fill="#959191"/>
+    </svg>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize if Swiper is available
+    if (typeof Swiper !== 'undefined') {
+      var swiperContainer = document.querySelector('.featured-swiper-container-{{ section.id }}');
+      
+      if (swiperContainer && !swiperContainer.swiper) {
+        var swiper = new Swiper('.featured-swiper-container-{{ section.id }}', {
+          slidesPerView: 1,
+          spaceBetween: 10,
+          navigation: {
+            nextEl: '.swiper-button-next-{{ section.id }}',
+            prevEl: '.swiper-button-prev-{{ section.id }}',
+          },
+          breakpoints: {
+            0: {
+              slidesPerView: 1,
+              spaceBetween: 40
+            },
+            768: {
+              slidesPerView: 3,
+              spaceBetween: 36
+            }
+          },
+        });
+      }
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "TW Collection List",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "heading",
+      "default": "Featured Collections"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "text",
+          "label": "Title",
+          "id": "title",
+          "default": "Collection Title"
+        },
+        {
+          "type": "text",
+          "label": "Sub Title",
+          "id": "sub_title",
+          "default": "Collection description"
+        },
+        {
+          "type": "url",
+          "label": "Button URL",
+          "id": "button_url"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TW Collection List",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

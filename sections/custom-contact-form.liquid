@@ -1,0 +1,329 @@
+{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+
+
+
+.custom_form_wrapper {
+    display: flex;
+    width: 63%;
+    margin: auto;
+    align-items: flex-start;
+    justify-content: center;
+    gap:20px;
+    /* height:56vh; */
+}
+  .custom_content_div{
+     width:45%;
+  }
+  .custom_form_div{
+     width:50%;
+  }
+
+.custom_form_wrapper {
+    background-image: url('//www.ecoconsious.com/cdn/shop/files/Get_In_Touch.png?v=1730798807');
+    background-size: cover;
+    background-position: center;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    padding: 40px 34px;
+    border-radius:8px;
+       background-repeat: no-repeat;
+}
+  
+.custom-form-title {
+    font-family: 'Raleway-Bold';
+    font-weight: 900;
+    font-size: 55px;
+    line-height: normal;
+  margin-bottom: 9px;
+}
+
+.des_div-form {
+    font-family: 'Raleway-Regular';
+    font-weight: 400;
+    font-size: 17px;
+    color: #000;
+  line-height: normal;
+}
+  .name-wrapper{
+    display:flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+  }
+.first-name input, .last-name input {
+    width: 100%;
+    padding: 9px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    color: #000;
+    font-size: 12px;
+    font-family: 'Raleway-Regular';
+}
+  .first-name,.last-name{
+     width:46%;
+  }
+.phone input,.email input, .request-type select{
+   width:96%;
+      padding: 9px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    font-size: 12px;
+}
+  .message textarea {
+    width: 96%;
+    padding: 18px;
+    height: 76px;
+     border: 1px solid #ccc;
+     border-radius: 4px;
+}
+  .contact-form div{
+     padding-bottom: 6px;
+  }
+  .submit input{
+    background: #44a30d;
+    WIDTH: 37%;
+    font-size: 17px;
+    padding: 10px 30px;
+    font-family: 'Raleway-Regular';
+    color: #fff;
+    border: 1px solid #44a30d;
+    font-weight: 800;
+    border-radius: 4px;
+  }
+  .request-type label,.message label{
+         font-size: 15px;
+    color: #000;
+    font-weight: 900;
+    font-family: 'Raleway-Regular';
+  }
+  #request-type option{
+     color:#000;
+  }
+  @media(max-width:768px){
+    .des_div-form {
+    font-family: 'Raleway-Regular';
+    font-weight: 400;
+    font-size: 13px;
+    color: #000;
+    line-height: normal;
+}
+     .custom-form-title{
+    font-weight: 900;
+    font-size: 33px;
+  }
+.request-type label, .message label {
+    font-size: 12px !important;
+    color: #000 !important;
+    font-weight: 900 !important;
+    font-family: 'Raleway-Regular' !important;
+}
+    .first-name input, .last-name input {
+    width: 100%;
+    padding: 9px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    color: #000;
+    font-size: 10px;
+    font-family: 'Raleway-Regular';
+}
+    .custom_form_wrapper {
+    display: flex;
+    width: 95%;
+    margin: auto;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+}
+    .custom_form_wrapper {
+    display: flex;
+    width: 93%;
+    margin: auto;
+    align-items: flex-start;
+    justify-content: center;
+    /* overflow: hidden; */
+}
+    .custom_content_div {
+       width:100%;
+       text-align:center;
+       line-height:normal;
+    }
+    .custom_form_div {
+    width: 100%;
+}
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding custom-bg-container">
+  <div class="contact custom_form_wrapper">
+    <div class="custom_content_div">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="title custom-form-title title-wrapper--no-top-margin inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+     {% if section.settings.form_description != blank %}
+      <div class="des_div-form">
+        {{ section.settings.form_description }}
+      </div>
+   {% endif %}
+       </div>
+  <div class="custom_form_div">
+   
+    {%- liquid
+      assign contact_form_class = 'isolate'
+      if settings.animations_reveal_on_scroll
+        assign contact_form_class = 'isolate scroll-trigger animate--slide-in'
+      endif
+    -%}
+
+    <!-- cotact form start here -->
+      {% form 'contact' %}
+  {{ form.errors | default_errors }}
+<div class="name-wrapper">
+  <div class="first-name">
+    <input type="text" placeholder="First Name" name="contact[first_name]" id="first-name" />
+  </div>
+  <div class="last-name">
+    <input type="text" placeholder="Last Name" name="contact[last_name]" id="last-name" />
+  </div>
+        </div>
+  <div class="phone">
+    <input type="tel" placeholder="Enter Mobile Number" name="contact[phone]" id="phone" />
+  </div>
+
+  <div class="email">
+    <input type="email" placeholder="Enter Email" name="contact[email]" id="email" />
+  </div>
+  <div class="request-type">
+  <label for="request-type">What is this regarding?</label>
+  <select id="request-type" name="contact[request_type]">
+    <option>Bulk Buy</option>
+    <option>Returns</option>
+    <option>Shipping</option>
+    <option>Custom order</option>
+    <option>Other</option>
+  </select>
+</div>
+
+ <div class="message">
+    <label for="message">Message</label>
+    <textarea name="contact[body]" id="message"></textarea>
+ </div>
+  <div class="submit">
+    <input type="submit" value="Send" />
+  </div>
+{% endform %}
+    
+    <!-- cotact form end here -->
+  </div>
+    
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom Contact Form",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "t:sections.contact-form.settings.title.default",
+      "label": "t:sections.contact-form.settings.title.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        },
+        {
+          "value": "hxl",
+          "label": "t:sections.all.heading_size.options__4.label"
+        },
+        {
+          "value": "hxxl",
+          "label": "t:sections.all.heading_size.options__5.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "textarea",
+       "id": "form_description",
+        "label": "Add Description"
+    },
+       {
+      "type": "image_picker",
+       "id": "bg_img",
+        "label": "Add Bg image"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Contact Form"
+    }
+  ]
+}
+{% endschema %}

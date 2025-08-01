@@ -1,0 +1,212 @@
+<style>
+  .in-the-press-wrapper {
+    text-align: center;
+    /* padding: 20px 0; */
+  } 
+
+  .in-the-press-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .marquee-container {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 20px;
+  }
+
+  .marquee-content {
+    display: inline-flex;
+    animation: scroll-marquee 200s linear infinite; 
+  }
+
+  .marquee-content:hover {
+    animation-play-state: paused;
+  }
+
+  .marquee-item {
+    flex: 0 0 auto;
+    display: flex;
+    border: 1px solid #f4f1ee;
+    border-right: none;
+    padding:18px 24px;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .marquee-item img {
+    width: 160px;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .marquee-item img:hover {
+    transform: scale(1.17);
+  }
+
+  @keyframes scroll-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  .marquee-duplicator {
+    display: inline-flex;
+  }
+
+  @media(max-width:768px){
+     .marquee-item {
+    padding: 10px 10px;
+}
+  }
+</style>
+
+<div class="in-the-press-wrapper page-width scroll-trigger animate--slide-in">
+  <div class="dw-heading-special" >{{ section.settings.add_heading }}</div>
+  <div class="marquee-container">
+    <div class="marquee-content">
+      <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Duplicated content for seamless scrolling -->
+      <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+            <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+            <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+            <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+            <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+            <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+              <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+              <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+        <div class="marquee-duplicator">
+        {% for block in section.blocks %}
+        <div class="marquee-item">
+          <a href="{{ block.settings.add_article_link }}" target="_blank">
+            <img src="{{ block.settings.add_article_image | img_url:'master' }}" alt="Article Image" loading="lazy">
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+{% schema %}
+{
+  "name": "In the Press",
+  "settings": [
+    {
+      "type": "text",
+      "id": "add_heading",
+      "label": "Add Heading",
+      "default": "In the news"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Add slide",
+      "type": "add_slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "add_article_image",
+          "label": "Add Article Image"
+        },
+        {
+          "type": "url",
+          "id": "add_article_link",
+          "label": "Article Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "In the Press",
+      "category": "Custom Sections"
+    }
+  ]
+}
+{% endschema %}

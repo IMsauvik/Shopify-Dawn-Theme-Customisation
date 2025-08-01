@@ -1,0 +1,137 @@
+<style>
+    .breadcrumbs__list {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      padding-block: 5px;
+      font-family: 'Raleway-Bold';
+    }
+
+    .breadcrumbs__item {
+      display: inline-block;
+    }
+
+  .breadcrumbs__item:not(:last-child):after {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" fill="%23000" stroke="%23000" viewBox="0 0 52 52" width="52" height="52"><path d="M8.4,42c-0.6,0-1-0.4-1-1V10.9c0-0.6,0.4-1,1-1h8.1c0.4,0,0.9,0.2,1.2,0.5L29.3,25c0.4,0.5,0.4,1.3,0,1.9L17.6,41.5c-0.3,0.4-0.8,0.6-1.3,0.6L8.4,42z"/><path d="M44.3,25L32.6,10.5c-0.5-0.6-1.4-0.8-2.1-0.2l-2.3,1.9c-0.7,0.5-0.8,1.5-0.2,2.1L37.5,26L28,37.8c-0.5,0.6-0.4,1.6,0.2,2.1l2.3,1.9c0.7,0.5,1.5,0.4,2.1-0.2L44.3,27C44.7,26.2,44.7,25.5,44.3,25z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin: 0 .5em;
+    vertical-align: middle;
+    font-family: 'Raleway-Bold';
+  }
+
+
+    .breadcrumbs__link {
+      text-decoration: none;
+      color: #000;
+      font-size: 16px;
+      font-family: 'Raleway-Bold';
+    }
+
+    .breadcrumbs__link[aria-current="page"] {
+      color: #bc6c25;
+      font-weight: normal;
+      text-decoration: none;
+      font-family: 'Raleway-Bold';
+    }
+
+    .breadcrumbs__link[aria-current="page"]:hover,
+    .breadcrumbs__link[aria-current="page"]:focus {
+      text-decoration: underline;
+      font-family: 'Raleway-Bold';
+    }
+    @media(max-width:768px){
+       .breadcrumbs__link{
+          font-size: 13px;
+         font-family: 'Raleway-Bold';
+       }
+    }
+</style>
+
+{%- unless template == 'index' or template == 'cart' or template == 'list-collections' or template == '404' -%}
+  {%- assign t = template | split: '.' | first -%}
+
+  <nav class="page-width breadcrumbs" role="navigation" aria-label="breadcrumbs">
+    <ol class="breadcrumbs__list">
+      <li class="breadcrumbs__item">
+        <a class="breadcrumbs__link" href="/">Home</a>
+      </li>
+      {%- case t -%}
+        {%- when 'page' -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ page.url }}" aria-current="page">{{ page.title }}</a>
+          </li>
+        {%- when 'product' -%}
+          {%- assign product_collection = product.collections.first -%}
+          {%- if product_collection -%}
+            <li class="breadcrumbs__item">
+              <a class="breadcrumbs__link" href="{{ product_collection.url }}">{{ product_collection.title }}</a>
+            </li>
+          {%- endif -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ product.url }}" aria-current="page">
+              {{- product.title | truncate: 52 -}}
+            </a>
+          </li>
+        {%- when 'collection' and collection.handle -%}
+          {%- if current_tags -%}
+            <li class="breadcrumbs__item">
+              {{ collection.title | link_to: collection.url }}
+            </li>
+            <li class="breadcrumbs__item">
+              {%- capture tag_url -%}{{ collection.url }}/{{ current_tags | join: "+"}}{%- endcapture -%}
+              <a class="breadcrumbs__link" href="{{ tag_url }}" aria-current="page">{{ current_tags | join: ' + ' }}</a>
+            </li>
+          {%- else -%}
+            <li class="breadcrumbs__item">
+              <a class="breadcrumbs__link" href="{{ collection.url }}" aria-current="page">{{ collection.title }}</a>
+            </li>
+          {%- endif -%}
+        {%- when 'blog' -%}
+          {%- if current_tags -%}
+            <li class="breadcrumbs__item">
+              {{ blog.title | link_to: blog.url }}
+            </li>
+            <li class="breadcrumbs__item">
+              {%- capture tag_url -%}{{blog.url}}/tagged/{{ current_tags | join: "+" }}{%- endcapture -%}
+              <a class="breadcrumbs__link" href="{{ tag_url }}" aria-current="page">{{ current_tags | join: ' + ' }}</a>
+            </li>
+          {%- else -%}
+            <li class="breadcrumbs__item">
+              <a class="breadcrumbs__link" href="{{ blog.url }}" aria-current="page">{{ blog.title }}</a>
+            </li>
+          {%- endif -%}
+        {%- when 'article' -%}
+          <li class="breadcrumbs__item">
+            {{ blog.title | link_to: blog.url }}
+          </li>
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ article.url }}" aria-current="page">{{ article.title }}</a>
+          </li>
+        {%- else -%}
+          <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" href="{{ request.path }}" aria-current="page">{{ page_title }}</a>
+          </li>
+      {%- endcase -%}
+    </ol>
+  </nav>
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Breadcrum",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+  ],
+  "presets": [
+    {
+      "name": "Breadcrum"
+    }
+  ]
+}
+{% endschema %}

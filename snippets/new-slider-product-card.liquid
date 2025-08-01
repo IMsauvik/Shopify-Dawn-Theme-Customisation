@@ -1,0 +1,84 @@
+{% comment %}
+  AMW Product Card Snippet - Enhanced for Featured Collection Slider
+  - Modern design with hover effects
+  - Responsive for all screen sizes
+  - Optimized badge and price displays
+  - Improved add to cart button functionality
+{% endcomment %}
+
+
+
+<div class="amw-product-card">
+  {% comment %} Image and badges {% endcomment %}
+  <div class="amw-product-card__image-container">
+    <a href="{{ card_product.url }}">
+      <img 
+        src="{{ card_product.featured_media | img_url: '450x450', crop: 'center' }}" 
+        alt="{{ card_product.title | escape }}" 
+        class="amw-product-card__image"
+        width="450"
+        height="450"
+        loading="lazy"
+      >
+    </a>
+    
+    <div class="amw-product-card__badges">
+      {% if card_product.available == false %}
+        <div class="amw-product-card__badge amw-product-card__badge--soldout">
+          {{ 'products.product.sold_out' | t }}
+        </div>
+      {% elsif card_product.compare_at_price > card_product.price %}
+        <div class="amw-product-card__badge amw-product-card__badge--sale">
+          {{ 'products.product.on_sale' | t }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  {% comment %} Product info {% endcomment %}
+  <div class="amw-product-card__info">
+    {% if card_product.vendor != blank %}
+    {% endif %}
+    
+    <a href="{{ card_product.url }}" class="amw-product-card__title">
+      {{ card_product.title }}
+    </a>
+    
+    <div class="amw-product-card__price-container">
+      {% if card_product.compare_at_price > card_product.price %}
+        <span class="amw-product-card__price amw-product-card__price--sale">
+          {{ card_product.price | money }}
+        </span>
+        <span class="amw-product-card__price--compare">
+          {{ card_product.compare_at_price | money }}
+        </span>
+      {% else %}
+        <span class="amw-product-card__price">
+          {{ card_product.price | money }}
+        </span>
+      {% endif %}
+    </div>
+    
+    {% comment %} Add to cart button {% endcomment %}
+    <div class="amw-product-card__buttons">
+      {%- assign product_form_id = 'product-form-' | append: section.id | append: card_product.id -%}
+      {%- form 'product', card_product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+        <input type="hidden" name="id" value="{{ card_product.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        
+        <button 
+          type="submit" 
+          name="add" 
+          class="amw-product-card__atc-button {% if card_product.available == false %}amw-product-card__atc-button--soldout{% endif %}" 
+          {% if card_product.available == false %}disabled{% endif %}
+        >
+          {% if card_product.available %}
+            {{ 'products.product.add_to_cart' | t }}
+          {% else %}
+            {{ 'products.product.sold_out' | t }}
+          {% endif %}
+        </button>
+      {%- endform -%}
+    </div>
+  </div>
+</div>

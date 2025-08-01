@@ -1,0 +1,407 @@
+/* --- Scratch Popup Section --- */
+.scratch-popup-section {
+  font-family: ATCArquette;
+}
+
+/* Overlay */
+.scratch-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75); /* Slightly darker */
+  z-index: 9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s; /* Delay visibility transition */
+  padding: 15px; /* Add padding for small screens */
+  box-sizing: border-box;
+}
+
+.scratch-popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease-in-out, visibility 0s linear 0s;
+}
+
+/* Popup Container */
+.scratch-popup-container {
+  position: relative;
+  background-color: #fff;
+  border-radius: 12px;
+  width: 100%; /* Use padding on overlay for spacing */
+  max-width: 450px; /* Slightly narrower */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  padding: 24px;
+  box-sizing: border-box;
+  /* Add animation for entry */
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease-in-out;
+}
+
+.scratch-popup-overlay.active .scratch-popup-container {
+   transform: scale(1);
+   opacity: 1;
+}
+
+/* Close Button */
+.popup-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #999;
+  z-index: 10;
+  padding: 5px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.popup-close-button:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* Popup Header */
+.popup-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.popup-header h2 {
+  font-size: clamp(20px, 5vw, 24px); /* Responsive font size */
+  margin: 0 0 8px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.popup-header p {
+  font-size: clamp(14px, 3.5vw, 16px);
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Step visibility */
+.scratch-popup-step {
+  animation: stepFadeIn 0.4s ease-out forwards;
+}
+
+.scratch-popup-step.hidden {
+  display: none; /* Use display none for complete removal from layout */
+}
+
+@keyframes stepFadeIn {
+    from { opacity: 0; } 
+    to { opacity: 1; }
+}
+
+/* --- Scratch Card Specific Styles --- */
+.scratch-card {
+  position: relative; /* Positioning context for children */
+  width: clamp(250px, 70vw, 320px); /* Responsive width */
+  aspect-ratio: 1 / 1; /* Make it square */
+  margin: 20px auto;
+  background-color: #f0f0f0; /* Fallback background */
+  border-radius: 8px;
+  overflow: hidden; /* Crucial */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3C/svg%3E") 12 12, grab;
+}
+
+.scratch-card:active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='grey' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='11'%3E%3C/circle%3E%3C/svg%3E") 14 14, grabbing;
+}
+
+/* Container for Canvas and Fallback IMG */
+.scratch-card-cover-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* Above the reward image */
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s ease-out, visibility 0s linear 0s; /* Opacity transition */
+  border-radius: inherit; /* Inherit from parent */
+}
+
+.scratch-card-cover-container.clear {
+  opacity: 0;
+  transition: opacity 0.4s ease-out, visibility 0s linear 0.4s; /* Delay visibility change */
+  pointer-events: none; /* Disable interaction when revealed */
+}
+
+.scratch-card-cover-container.hidden {
+  /* Fully hide after transition */
+  display: none;
+}
+
+/* Interactive Canvas */
+.scratch-card-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2; /* Receives pointer events */
+  display: block; /* Remove extra space */
+  border-radius: inherit;
+  /* Use hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  touch-action: none; /* Prevent browser default touch actions */
+}
+
+/* Fallback Image for Safari/iOS */
+.scratch-card-canvas-render {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Visually replaces canvas, but canvas is still on top for events */
+  pointer-events: none; /* Does not capture events */
+  display: block;
+  border-radius: inherit;
+}
+
+.scratch-card-canvas-render.hidden {
+  display: none;
+}
+
+/* Static image container */
+.scratch-card-static-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.scratch-card-static-container.hidden {
+  display: none;
+}
+
+.scratch-card-static-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* GIF container */
+.scratch-card-gif-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.scratch-card-gif-container.hidden {
+  display: none;
+}
+
+.scratch-card-gif-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Animation for the GIF image */
+.scratch-card-gif-image.animate {
+  animation: pop-out-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes pop-out-in {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Text below scratch card */
+.scratch-card-text {
+  text-align: center;
+  font-size: clamp(16px, 4vw, 18px);
+  font-weight: 500;
+  margin: 16px 0 0 0; /* Adjust margin */
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+/* --- Product Reward Styles --- */
+.product-reward-container {
+  display: flex;
+  flex-direction: column; /* Default stack layout */
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.product-image-container {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  margin: 0 auto; /* Center image when stacked */
+}
+
+.product-image-container img,
+.product-image-container .placeholder-svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #eee;
+}
+
+.product-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center; /* Center text when stacked */
+  gap: 8px;
+}
+
+.product-title {
+  font-size: 18px;
+  margin: 0 0 4px;
+  color: #333;
+  font-weight: 600;
+}
+
+.product-price-container {
+  display: flex;
+  align-items: baseline; /* Align prices */
+  justify-content: center; /* Center when stacked */
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e74c3c; /* Highlight price */
+}
+
+.product-compare-price {
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.coupon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center when stacked */
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.coupon-code {
+  padding: 8px 14px;
+  background-color: #eef7ff; /* Light blue background */
+  border: 1px dashed #a0c4e4;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(16px, 4vw, 18px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #2c5a8c; /* Darker blue text */
+}
+
+.copy-coupon-btn {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.copy-coupon-btn:hover {
+  background-color: #3a7bc8;
+}
+.copy-coupon-btn:active {
+  transform: scale(0.95);
+}
+.copy-coupon-btn:disabled {
+    background-color: #ccc;
+    cursor: default;
+}
+
+.redeem-button {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white !important; /* Ensure text color */
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  margin-top: 8px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.redeem-button:hover {
+  background-color: #3e8e41;
+   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.redeem-button:active {
+   transform: scale(0.98);
+   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+/* Responsive Adjustments */
+@media (min-width: 480px) {
+  .product-reward-container {
+    flex-direction: row; /* Side-by-side layout on larger screens */
+    align-items: center;
+  }
+
+  .product-image-container {
+     margin: 0; /* Reset margin */
+  }
+
+  .product-details {
+    text-align: left; /* Align text left */
+  }
+
+  .product-price-container,
+  .coupon-container {
+     justify-content: flex-start; /* Align left */
+  }
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap; /* Prevent line breaks */
+}

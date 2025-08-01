@@ -1,0 +1,197 @@
+<style>
+  #shopify-section-{{ section.id }} .no-link {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  #shopify-section-{{ section.id }} .logoTextParent {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 21px;
+    padding-block: 20px;
+  }
+
+  #shopify-section-{{ section.id }} .logoTextIndv {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    justify-content: flex-start;
+  }
+
+  #shopify-section-{{ section.id }} .logoTextIndv img {
+    width: 100px;
+    height: 100px;
+  }
+
+  @media (max-width: 786px) {
+    #shopify-section-{{ section.id }} .logoTextParent {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      gap: 10px;
+      padding-block: 10px;
+    }
+
+    #shopify-section-{{ section.id }} .logoTextIndv {
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 35%;
+    }
+
+    #shopify-section-{{ section.id }} .logoTextIndv img {
+      width: 60px !important;
+      height: 60px !important;
+    }
+
+    .logoTextIndvText h3 {
+      font-size: 18px !important;
+      text-align: center !important;
+      margin-block: 4px;
+      font-family: Raleway-Regular;
+      font-weight: 400;
+      text-decoration: none;
+    }
+
+    .logoTextIndvText p {
+      font-size: 12px !important;
+      font-weight: 400;
+      line-height: 18px;
+      text-align: center;
+      font-family: Raleway-Regular;
+    }
+
+    .dw-heading-special-margin {
+      margin-top: 0;
+    }
+  }
+
+  {% if request.page_type == "index" or template.suffix == 'ecoconscious' %}
+    .logoTextIndvText h3 {
+      font-family: Raleway-Regular;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 27.6px;
+      margin-block: 8px;
+      text-align: left;
+    }
+
+    .logoTextIndvText p {
+      font-family: Raleway-Regular;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 18.4px;
+      text-align: left;
+    }
+  {% endif %}
+
+  {% if page.template_suffix == "dencrus-landing-page" %}
+    .dw-heading-special {
+      font-family: Raleway-Bold;
+      font-size: 30px;
+      font-weight: 600;
+      text-align: center;
+      color: #000;
+      margin: 24px 0 4px;
+    }
+
+    .logoTextIndvText h3,
+    .logoTextIndvText p {
+      font-family: Raleway-Regular;
+    }
+
+    @media(max-width: 786px) {
+      .dw-heading-special {
+        font-size: 20px;
+      }
+    }
+  {% endif %}
+
+  {% if page.template_suffix == "shaveco-landing-page" %}
+    .logoTextIndvText h3,
+    .logoTextIndvText p {
+      font-family: Raleway-Regular;
+    }
+  {% endif %}
+
+  .no-tel-link {
+    pointer-events: none;
+    text-decoration: none;
+    color: inherit;
+  }
+</style>
+
+<div class="dw-heading-special dw-heading-special-margin scroll-trigger animate--slide-in">
+  Our Impact
+</div>
+
+<div class="logoTextParent page-width scroll-trigger animate--slide-in">
+  {% for block in section.blocks %}
+    <div class="logoTextIndv">
+      <img
+        class="lazy"
+        data-src="{{ block.settings.logo_img | image_url: width: 100 }}"
+        data-width="{{ block.settings.logo_img.width }}"
+        data-height="{{ block.settings.logo_img.height }}"
+        alt="{{ block.settings.logo_caption | escape }}"
+      >
+      <div class="logoTextIndvText">
+        <h3 class="no-tel-link">{{ block.settings.logo_caption }}</h3>
+        <p>{{ block.settings.logo_para }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  // Remove tel: links to prevent unwanted phone linking
+  document.querySelectorAll('a[href^="tel"]').forEach(link => link.removeAttribute('href'));
+
+  // LazyLoad Initialization
+  window.addEventListener('DOMContentLoaded', function () {
+    if (typeof LazyLoad !== "undefined") {
+      new LazyLoad({
+        elements_selector: ".lazy"
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "TW Logo Text",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Upload Image",
+          "id": "logo_img"
+        },
+        {
+          "type": "text",
+          "label": "Enter Caption",
+          "id": "logo_caption"
+        },
+        {
+          "type": "textarea",
+          "label": "Enter Para",
+          "id": "logo_para"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TW Logo Text"
+    }
+  ]
+}
+{% endschema %}

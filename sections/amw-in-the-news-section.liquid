@@ -1,0 +1,213 @@
+{% stylesheet %}
+.in-the-news-section {
+  text-align: center;
+  padding: 20px;
+}
+
+.in-the-news-section__heading {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  
+}
+
+.in-the-news-section .swiper-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.in-the-news-section .swiper-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 15px;
+ /* box-shadow: rgba(50, 50, 93, 0.25) 0px 33px 27px -38px, rgba(0, 0, 0, 0.3) 0px 16px 11px -29px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset; */
+  /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; */
+  border-radius: 8px 8px 0px 8px ;
+   margin-top:20px;
+  border: 1px solid #f2f2f2;
+
+}
+  .in-the-news-section .swiper-slide:hover{
+    border:1px solid #000;
+    scale:1.001;
+
+ 
+}
+
+.article-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  aspect-ratio: 2 / 1.5;
+  object-fit: cover;
+}
+
+.article-date {
+    font-size: 11px;
+    color: #888;
+    margin-top: 0px;
+}
+
+.article-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    color: #333;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: normal;
+}
+
+.article-logo-name {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+
+}
+
+.article-logo {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+}
+
+.article-name {
+  font-size: 13px;
+  color: #555;
+  font-family:Mo ;
+
+
+}
+  .in-the-news-section .swiper-pagination-bullet-active {
+     background:#000 !important;
+     scale: 1.1 !important;
+  }
+  .news-card-link {
+        text-decoration:none;
+   color:inherit;
+  }
+@media (max-width: 768px) {
+  .in-the-news-section .swiper-slide {
+  padding: 6px;
+
+}
+  .in-the-news-section {
+  text-align: center;
+  padding: 10px;
+}
+  
+}
+{% endstylesheet %}
+
+<div class="in-the-news-section">
+  <h2 class="in-the-news-section__heading dw-heading-special">{{ section.settings.add_heading }}</h2>
+  
+  <div class="swiper swiper-container-article">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+      <div class="swiper-slide">
+        <a href="{{ block.settings.add_article_link }}" target="_blank" class="news-card-link">
+          <img src="{{ block.settings.add_article_image | img_url: '400x400' }}" alt="Article Image" class="article-image">
+          
+          <div class="article-date">{{ block.settings.add_date }}</div>
+          <div class="article-title">{{ block.settings.add_article_title }}</div>
+          
+          <div class="article-logo-name">
+            <img src="{{ block.settings.add_article_logo | img_url: '30x30' }}" alt="Article Logo" class="article-logo">
+            <span class="article-name">{{ block.settings.add_article_name }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Pagination Dots -->
+    <div class="swiper-pagination-inthe-news"></div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    new Swiper(".swiper-container-article", {
+      slidesPerView: 2,
+      spaceBetween: 10,
+      loop: true,
+      autoplay: {
+        delay: 2000, // Time between slide transitions (in ms)
+        disableOnInteraction: false // Keep autoplay even after user interaction
+      },
+      speed: 800,
+      pagination: {
+        el: ".swiper-pagination-inthe-news",
+        clickable: true
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 5,
+          spaceBetween: 20 
+        }
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "In the News",
+  "settings": [
+    {
+      "type": "text",
+      "id": "add_heading",
+      "label": "Add Heading",
+      "default": "In the news"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Add slide",
+      "type": "add_slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "add_article_image",
+          "label": "Add Article Image"
+        },
+        {
+          "type": "textarea",
+          "id": "add_date",
+          "label": "Add Date"
+        },
+        {
+          "type": "text",
+          "id": "add_article_title",
+          "label": "Add Article Title"
+        },
+        {
+          "type": "image_picker",
+          "id": "add_article_logo",
+          "label": "Add Article Logo"
+        },
+        {
+          "type": "text",
+          "id": "add_article_name",
+          "label": "Add Article Name"
+        },
+        {
+          "type": "url",
+          "id": "add_article_link",
+          "label": "Article Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "In the News"
+    }
+  ]
+}
+{% endschema %}

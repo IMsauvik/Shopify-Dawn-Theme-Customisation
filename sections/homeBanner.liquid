@@ -1,0 +1,57 @@
+<style>
+      #shopify-section-{{ section.id }} {
+      .homeBannerParent img{
+        width: 100%;
+        height: auto;
+      }
+      }
+
+      @media(min-width:768px){
+         .homeBannerParent{
+            width:65%;
+            margin:auto;
+         }
+       .homeBannerParent img {
+        margin-block: 40px;
+        margin-bottom: -9px!important;
+    }
+      }
+
+
+    @media(max-width:768px){
+      .homeBannerParent img {
+      margin-bottom: -15px!important;
+  }
+    }
+</style>
+
+<div class="homeBannerParent">
+  <picture>
+    <source media="(max-width:1079px)" srcset="{{ section.settings.mobImage | image_url }}">
+    <img src="{{ section.settings.deskImage | image_url }}" width="image.width" height="image.height">
+  </picture>
+</div>
+
+{% schema %}
+{
+  "name": "Home Banner",
+  "tag": "section",
+  "settings": [
+     {
+      "type": "image_picker",
+      "label": "Upload Desktop Image",
+      "id": "deskImage"
+    },
+    {
+      "type": "image_picker",
+      "label": "Upload Mobile Image",
+      "id": "mobImage"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home Banner"
+    }
+  ]
+}
+{% endschema %}

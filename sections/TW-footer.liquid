@@ -1,0 +1,1146 @@
+<style>
+  .copy_right_text {
+    color: #fff;
+    margin-left: 33px;
+    font-size: 12px;
+}
+  .copy_right_text{
+     color:#fff;
+     font-size: 12px;
+  }
+         #shopify-section-{{ section.id }}
+        {
+             .subtitle-footer{
+          color:#fff;
+          line-height:normal;
+       width: 88%;
+      margin-inline: auto;
+    font-family: Raleway-Regular;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 21.9px;
+    text-align: left;
+    margin-bottom: 15px;
+       }
+          .field__input:focus ~ .field__label{
+            font-size: 10px;
+          }
+        .field:hover.field:after,
+      .select:hover.select:after,
+      .select__select:hover.select__select:after,
+      .customer .field:hover.field:after,
+      .customer select:hover.select:after,
+      .localization-form__select:hover.localization-form__select:after {
+        box-shadow: unset;
+      }
+          .facebook-img{
+            text-decoration:none;
+          }
+  h2.cfooter-title.email-title {
+      width: 88%;
+      margin-inline: auto;
+      font-family: Raleway-Regular;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 21.9px;
+      text-align: left;
+      margin-bottom: 21px;
+  }
+          .dw-footer-logo{
+            position: absolute;
+            bottom: -11px;
+            right: 0;
+            width: 100px;
+          }
+          .dw-footer-logo img{
+            width:100%;
+            opacity:0.5;
+          }
+          .field:after, .select:after, .customer .field:after, .customer select:after, .localization-form__select:after{
+            box-shadow:none;
+          }
+          .field__input:focus, .select__select:focus, .customer .field input:focus, .customer select:focus, .localization-form__select:focus.localization-form__select:after{
+             box-shadow:none;
+          }
+          .dw-field__input{
+            background: #d9e2cb;
+            border-radius: 0px;
+            flex-grow: unset;
+          }
+          .dw-field__label{
+            color: #000;
+            font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font_font.family }};
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 16.1px;
+          }
+          .dw-field__button{
+            width:9rem;
+            background: #FCF9E1;
+            font-size: 16px;
+            font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font_font.family }};
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 24px;
+          }
+          .dw-hr{
+            border: none;
+            height: 0.1rem;
+            background-color: white;
+            display: block;
+            margin:0;
+          }
+          .dw-belowdiv{
+            display: flex;
+            justify-content: center;
+          }
+          .builtby {
+            width: 95%;
+            text-align: center;
+            margin: auto;
+            color: white;
+            cursor: pointer;
+            padding-top: 20px;
+          }
+          .builtby a{
+            color: #fff;
+          }
+          .footer-wrapper{
+            padding: 1% 6%;
+            background: {{section.settings.div_color}};
+          }
+          .tw-footer {
+            display: grid;
+            grid-template-columns: 1.5fr 1.5fr 2fr;
+          }
+          .dw-footer-div{
+            position:relative;
+          }
+
+          .footer-nav{
+            padding: 0;
+          }
+
+          .menu-items{
+            list-style: none;
+          }
+
+          .right-block{
+            display: grid;
+            grid-template-columns: 1fr;
+          }
+          .social-div {
+            display: flex;
+            gap: 16px;
+          }
+          .social-div img {
+            width: 24px;
+          }
+          .copyright-text{
+             font-family: {{ section.settings.custom_body_font_family |  default : settings.type_body_font_font.family }};
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 16.1px;
+            color: #fff;
+          }
+        .field__button{
+          top:1.2px
+        }
+          .dw-desktop{
+            display:block;
+        width: 89%;
+        margin: auto;
+          }
+              .dw-mobile{
+            display:none;
+          }
+
+        @media(max-width: 980px){
+          .subtitle-footer{
+             width:100%;
+          }
+
+          .accordian-head {
+            margin-bottom:0px;
+            display: flex;
+                justify-content: space-between;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    h2.cfooter-title.email-title {
+        width: 100%;
+        margin-inline: auto;
+      font-family: Raleway-Regular;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: left;
+        margin-bottom:3px;
+    }
+
+    .accordian-head::after {
+      content: '+';
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .accordian-body.active {
+      display: block;
+    }
+
+    .accordian-head.active::after {
+      content: '-';
+      transform: rotate(360deg);
+    }
+
+          /* Ensure that the accordion sections are initially hidden */
+    .accordian-body {
+      display: none;
+    }
+
+    /* Display accordion section when it is active */
+    .accordian-body.active {
+      display: block;
+    }
+
+    /* Style for accordion headers to make them clickable */
+    .accordian-head {
+      cursor: pointer;
+    }
+
+    /* Optional: Add some transition effects */
+    .accordian-body {
+      transition: max-height 0.3s ease-out;
+      overflow: hidden;
+    }
+
+           .footer-wrapper{
+            padding: 1% 6%;
+
+          }
+          /* .dw-desktop{
+            display:none;
+          } */
+          .dw-mobile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+          .tw-footer {
+            grid-template-columns: 1fr;
+            gap:10px;
+          }
+          .copyright-text{
+            text-align: left;
+            margin-bottom:0.83rem;
+          }
+          .left-block {
+            /* order: 1; */
+          }
+          .dw-belowdiv{
+           flex-direction:column;
+          }
+          .menu-box:nth-child(1) {
+            /* order: 2; */
+          }
+          .menu-box:nth-child(2) {
+            /* order: 3s; */
+          }
+          .right-block {
+
+          }
+          .right-block{
+            gap:24px;
+          }
+        }
+
+           .cfooter-title{
+            font-family: Raleway-Bold;
+            font-size: 20px;
+            font-weight: 600;
+            color: #FCF9E1;
+          }
+          .menu-items a{
+           font-family: Raleway-Regular;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 18.4px;
+            text-align: left;
+            text-decoration: none;
+            color: #FCF9E1;
+          }
+          {% if page.handle == 'dencrus' %}
+           .cfooter-title{
+            font-family: Raleway-Bold;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 24.38px;
+            text-align: left;
+            color: #FFFFFF;
+          }
+         .menu-items a{
+          font-family: Raleway-Regular;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 19.5px;
+          text-align: left;
+           text-decoration: none;
+            color: #fff;
+          }
+        {% endif %}
+             {% if page.handle == 'shaveco' %}
+           .cfooter-title{
+            font-family: Raleway-Bold;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 24.38px;
+            text-align: left;
+            color: #FFFFFF;
+          }
+         .menu-items a{
+          font-family: Raleway-Regular;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 19.5px;
+          text-align: left;
+           text-decoration: none;
+            color: #fff;
+          }
+        {% endif %}
+          {% if template contains 'product' %}
+            {% if template.suffix == "dencrus-product-template" %}
+               .cfooter-title{
+                  font-family: Raleway-Bold;
+                  font-size: 20px;
+                  font-weight: 600;
+                  line-height: 24.38px;
+                  text-align: left;
+                  color: #FFFFFF;
+                }
+               .menu-items a{
+                font-family: Raleway-Regular;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 19.5px;
+                text-align: left;
+                text-decoration: none;
+                color: #fff;
+                }
+            {% endif %}
+          {% endif %}
+          {% if template contains 'product' %}
+            {% if template.suffix == 'shaveco-product-template' %}
+               .cfooter-title{
+                font-family: Raleway-Bold;
+                font-size: 20px;
+                font-weight: 600;
+                line-height: 24.38px;
+                text-align: left;
+                color: #FFFFFF;
+              }
+               .menu-items a{
+                font-family: Raleway-Regular;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 19.5px;
+                text-align: left;
+                text-decoration: none;
+                color: #fff;
+                }
+            {% endif %}
+          {% endif %}
+           {% if template contains 'collection' %}
+            {% if template.suffix == "dencrus-collection-template" %}
+               .cfooter-title{
+                  font-family: Raleway-Bold;
+                  font-size: 20px;
+                  font-weight: 600;
+                  line-height: 24.38px;
+                  text-align: left;
+                  color: #FFFFFF;
+                }
+               .menu-items a{
+                font-family: Raleway-Regular;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 19.5px;
+                text-align: left;
+                text-decoration: none;
+                color: #fff;
+                }
+            {% endif %}
+          {% endif %}
+          {% if template contains 'collection' %}
+            {% if template.suffix == 'shaveco-collection-template' %}
+               .cfooter-title{
+                font-family: Raleway-Bold;
+                font-size: 20px;
+                font-weight: 600;
+                line-height: 24.38px;
+                text-align: left;
+                color: #FFFFFF;
+              }
+               .menu-items a{
+                font-family: Raleway-Regular;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 19.5px;
+                text-align: left;
+                text-decoration: none;
+                color: #fff;
+                }
+            {% endif %}
+          {% endif %}
+
+        }
+</style>
+
+<style>
+      .first_logo_cont {
+        display: flex;
+        align-items: center;
+    }
+     .marketplace_by, .text-container a, .supporetd_text_has{
+        color: #000;
+        font-family: 'Raleway-Bold';
+        font-size: 24px;
+      }
+    .zerodha_logo {
+        height: auto;
+        width: 100px;
+        margin-right: 9px;
+        margin-left: 9px;
+    }
+      .upay_logo{
+        height: 23px;
+      }
+      .copyright-text-logo-container{
+        text-align: center;
+      }
+      .first_logo_cont:nth-of-type(2) {
+       margin-top: -20px;
+    }
+        .social-menus-follow-us{
+        font-family: Raleway-Bold;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: left;
+        color:#fff;
+         width: 88%;
+       margin-inline: auto;
+      margin-block:10px;
+
+
+    }
+      @media(max-width:768px){
+          .copy_right_text {
+    color: #fff;
+    margin-left: 0;
+    font-size: 12px;
+}
+        .text-container img {
+        width: 50%;
+        margin: auto;
+        margin-top: 6px;
+        }
+          .first_logo_cont {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+        .marketplace_by, .text-container a, .supporetd_text_has{
+        color: #000;
+        font-family: 'Raleway-Bold';
+        font-size: 16px;
+      }
+        .cfooter-title{
+         font-size: 18px !important;
+        }
+        .supporetd_text_has_sec{
+            font-size: 12px;
+        }
+      .first_logo_cont:nth-of-type(2) {
+        margin-top: -10px;
+       margin-bottom: 5px;
+    }
+      .amwoodo_footer_logo {
+        width: 121px !important;
+      }
+        .social-menus-follow-us{
+           display:none;
+        }
+
+      }
+
+      @media(min-width:768px){
+        .width-full-footer{
+           width:23%;
+        }
+         .social-div {
+        justify-content: flex-end;
+    }
+      }
+    .accordian-head img{
+      width: 52%;
+    }
+    @media(max-width:768px){
+       .accordian-head img {
+      width: 42%;
+  }
+     .menu-box .field{
+         width:100%;
+      }
+    }
+
+
+  .news-letter-place{
+     display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .echo-footer-logos{
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-right: 14px;
+  }
+  .footer-usp-logo {
+    display: flex;
+    width: 95%;
+    margin: auto;
+}
+  @media(max-width:768px){
+    /* .news-letter-place{
+       display:none;
+    } */
+    .footer-usp-logo {
+    display: flex;
+    width: 100%;
+    margin-top: 2%;
+    margin: auto;
+    margin-top: 10px;
+}
+      .echo-footer-logos{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right:0px;
+  }
+    .echo-footer-logos img:nth-child(1) {
+  width: 45px !important;
+    height: 45px !important;
+}
+
+/* Targets the second image */
+.echo-footer-logos img:nth-child(2) {
+  width: 30px !important;
+    height: 30px !important;
+}
+
+/* Targets the third image */
+.echo-footer-logos img:nth-child(3) {
+    width: 27px !important;
+    height: 27px !important;
+}
+    .dw-desktop {
+    display: block;
+    width: 100% !important;
+    margin: auto;
+}
+    .footer-usp-logo{
+       margin-top:0;
+    }
+  }
+</style>
+  
+<footer class="footer-wrapper">
+  <div class="dw-footer-div">
+    <div class="tw-footer">
+      <div class="left-block">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'left-menu' %}
+              <div class="menu-box">
+                <h2 class="cfooter-title accordian-head">
+                  <img data-src="{{ section.settings.image-Logo | img_url:'master' }}" class="lazy">
+                </h2>
+                <div class="content accordian-body">
+                  {% if linklists[block.settings.menu].links.size > 0 %}
+                    {% assign footer_nav = block.settings.menu %}
+
+                    <ul class="footer-nav plain-list" role="navigation" aria-label="Secondary">
+                      {% for link in linklists[footer_nav].links %}
+                        <li class="menu-items">
+                          <a href="{{ link.url }}" title="{{ link.title }}">
+                            {{ link.title }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'mid-menu' %}
+            <div class="menu-box">
+              <h2 class="cfooter-title accordian-head">{{ block.settings['menu-title'] | escape }}</h2>
+              <div class="content accordian-body">
+                {% if linklists[block.settings['menu-1']].links.size > 0 %}
+                 {% if request.page_type == 'index' %}
+                    {% assign footer_nav = block.settings['menu-1'] %}
+                  {% endif %}
+                   {% if page.handle == 'imeco' %}
+                      {% assign footer_nav = block.settings['menu-1'] %}
+                     {% endif%}
+                  {% if page.handle == 'dencrus' %}
+                    {% assign footer_nav = block.settings['menu-2'] %}
+                  {% endif %}
+                  {% if page.handle == 'shaveco' %}
+                    {% assign footer_nav = block.settings['menu-3'] %}
+                  {% endif %}
+                  {% if template contains 'product' %}
+                    {% if template.suffix == 'shaveco-product-template' %}
+                      {% assign footer_nav = block.settings['menu-3'] %}
+                    {% elsif template.suffix == 'dencrus-product-template' %}
+                      {% assign footer_nav = block.settings['menu-2'] %}
+                    {% else %}
+                      {% assign footer_nav = block.settings['menu-1'] %}
+                    {% endif %}
+                  {% endif %}
+                  {% if template contains 'collection' %}
+                    {% if template.suffix == 'shaveco-collection-template' %}
+                      {% assign footer_nav = block.settings['menu-3'] %}
+                    {% elsif template.suffix == 'dencrus-collection-template' %}
+                      {% assign footer_nav = block.settings['menu-2'] %}
+                    {% else %}
+                      {% assign footer_nav = block.settings['menu-1'] %}
+                    {% endif %}
+                    {% else %}
+                    
+                  {% endif %}
+                  <ul class="footer-nav plain-list" role="navigation" aria-label="Secondary">
+                    {% for link in linklists[footer_nav].links %}
+                      <li class="menu-items">
+                        <a href="{{ link.url }}" title="{{ link.title }}">
+                          {{ link.title }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+      <!-- <div class="footer_contact_us">
+      
+
+        
+      </div> -->
+
+      
+      <div class="right-block">
+        <div class="right-top">
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'right-top-menu' %}
+                <div class="menu-box">
+                  <h2 class="cfooter-title email-title">{{ block.settings['menu-title'] | escape }}</h2>
+                  <div class="subtitle-footer">
+                    Enter your email below to stay updated about our new collections, in-store surprises, pop-ups,
+                    events and more.
+                  </div>
+                  <div class="newsletter-form">
+                    {% form 'customer', class: 'newsletter-form' %}
+                      <input type="hidden" name="contact[tags]" value="newsletter">
+                      <div
+                        class="newsletter-form__field-wrapper{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+                        {% if settings.animations_reveal_on_scroll %}
+                          data-cascade
+                          style="--animation-order: {{ forloop.index }};"
+                        {% endif %}
+                      >
+                        <div class="field">
+                          <input
+                            id="NewsletterForm--{{ section.id }}"
+                            type="email"
+                            name="contact[email]"
+                            class="field__input dw-field__input"
+                            value="{{ form.email }}"
+                            aria-required="true"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            autocomplete="email"
+                            {% if form.errors %}
+                              autofocus
+                              aria-invalid="true"
+                              aria-describedby="Newsletter-error--{{ section.id }}"
+                            {% elsif form.posted_successfully? %}
+                              aria-describedby="Newsletter-success--{{ section.id }}"
+                            {% endif %}
+                            placeholder="your@email.com"
+                            required
+                          >
+                          <label class="field__label dw-field__label" for="NewsletterForm--{{ section.id }}">
+                            your@email.com
+                          </label>
+                          <button
+                            type="submit"
+                            class="newsletter-form__button field__button dw-field__button"
+                            name="commit"
+                            id="Subscribe"
+                            aria-label="{{ 'newsletter.button_label' | t }}"
+                          >
+                            Sign Up
+                          </button>
+                        </div>
+                        {%- if form.errors -%}
+                          <small class="newsletter-form__message form__message" id="Newsletter-error--{{ section.id }}">
+                            {%- render 'icon-error' -%}
+                            {{- form.errors.translated_fields.email | capitalize }}
+                            {{ form.errors.messages.email -}}
+                          </small>
+                        {%- endif -%}
+                      </div>
+                      {%- if form.posted_successfully? -%}
+                        <h3
+                          class="newsletter-form__message newsletter-form__message--success form__message"
+                          id="Newsletter-success--{{ section.id }}"
+                          tabindex="-1"
+                          autofocus
+                        >
+                          {% render 'icon-success' -%}
+                          {{- 'newsletter.success' | t }}
+                        </h3>
+                      {%- endif -%}
+                    {% endform %}
+                  </div>
+                  <div class="footer-usp-logo">
+                    <div class="news-letter-place">
+                  <div class="social-menus-follow-us">Follow us on</div>
+                  <div class="social-div dw-desktop">
+                    {% for block in section.blocks %}
+                      {% case block.type %}
+                        {% when 'social-menu-1' %}
+                          {% if request.page_type == 'index' or template.suffix == 'im-eco-page-template' or page.handle == 'about-us' %}
+                            <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                              <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                            </a>
+                          {% endif %}
+                          {% if template contains 'product' %}
+                            {% unless template.suffix == 'dencrus-product-template'
+                              or template.suffix == 'shaveco-product-template'
+                            %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endunless %}
+                          {% endif %}
+                          {% if template contains 'collection' %}
+                            {% unless template.suffix == 'dencrus-collection-template'
+                              or template.suffix == 'shaveco-collection-template'
+                            %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endunless %}
+                          {% endif %}
+                        {% when 'social-menu-2' %}
+                          {% if page.handle == 'dencrus' %}
+                            <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                              <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                            </a>
+                          {% endif %}
+                          {% if template contains 'product' %}
+                            {% if template.suffix == 'dencrus-product-template' %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                          {% if template contains 'collection' %}
+                            {% if template.suffix == 'dencrus-collection-template' %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endif %}
+                          {% endif %}
+
+                        {% when 'social-menu-3' %}
+                          {% if page.handle == 'shaveco' %}
+                            <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                              <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                            </a>
+                          {% endif %}
+                          {% if template contains 'product' %}
+                            {% if template.suffix == 'dencrus-product-template' %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                          {% if template contains 'collection' %}
+                            {% if template.suffix == 'dencrus-collection-template' %}
+                              <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                                <img data-src="{{ block.settings.image1 | image_url}}" class="lazy">
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                      {% endcase %}
+                    {% endfor %}
+                  
+                  </div>
+                  </div>
+                <div class="echo-footer-logos">
+                <img style="width:50px;height:50px;" data-src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Vegan_8c5fb08d-99b6-4adf-b749-ed2932306e5d.png?v=1730103952" class="lazy" />
+                <img style="width:40px;height:40px;" data-src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Cruelty_Free_2-latest.png?v=1730107880"  class="lazy"/>
+                 <!-- <img style="width:35px;" src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Amwood_Eco_Products_Private_Limited_IN_English_2024_Certification_Badge_Edited_1.png?v=1740643429" />
+                  -->
+                    
+                  </div>
+                 </div>
+                  <div class="copy_right_text">
+                     Copyright ©Amwoodo Eco Products Private Limited. All Rights Reserved.
+                  </div>
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+
+        {% comment %}  <h2 class="cfooter-title">{{ block.settings['menu-title'] | escape }}</h2>{% endcomment %}
+        <!-- <div class="social-div dw-mobile">
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'social-menu-1' %}
+                {% if request.page_type == 'index' %}
+                  <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                    <img src="{{ block.settings.image1 | image_url}}">
+                  </a>
+                {% endif %}
+                {% if template contains 'product' %}
+                  {% unless template.suffix == 'dencrus-product-template'
+                    or template.suffix == 'shaveco-product-template'
+                  %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endunless %}
+                {% endif %}
+                {% if template contains 'collection' %}
+                  {% unless template.suffix == 'dencrus-collection-template'
+                    or template.suffix == 'shaveco-collection-template'
+                  %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endunless %}
+                {% endif %}
+              {% when 'social-menu-2' %}
+                {% if page.handle == 'dencrus' %}
+                  <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                    <img src="{{ block.settings.image1 | image_url}}">
+                  </a>
+                {% endif %}
+                {% if template contains 'product' %}
+                  {% if template.suffix == 'dencrus-product-template' %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endif %}
+                {% endif %}
+                {% if template contains 'collection' %}
+                  {% if template.suffix == 'dencrus-collection-template' %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endif %}
+                {% endif %}
+
+              {% when 'social-menu-3' %}
+                {% if page.handle == 'shaveco' %}
+                  <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                    <img src="{{ block.settings.image1 | image_url}}">
+                  </a>
+                {% endif %}
+                {% if template contains 'product' %}
+                  {% if template.suffix == 'dencrus-product-template' %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endif %}
+                {% endif %}
+                {% if template contains 'collection' %}
+                  {% if template.suffix == 'dencrus-collection-template' %}
+                    <a href="{{ block.settings.url1 }}" target="_blank" class="facebook-img">
+                      <img src="{{ block.settings.image1 | image_url}}">
+                    </a>
+                  {% endif %}
+                {% endif %}
+            {% endcase %}
+          {% endfor %}
+        </div> -->
+      </div>
+    </div>
+  </div>
+</footer>
+<hr class="dw-hr">
+<div class="dw-belowdiv">
+  <div style="display:block"></div>
+  <div class="copyright-text-logo-container">
+    <div class="text-container">
+     
+      <picture>
+        <source media="(max-width:650px)" data-srcset="{{ section.settings.poweredby_mobile | img_url:'master' }}">
+        <img class="width-full-footer lazy" data-src="{{ section.settings.poweredby_desktop | img_url:'master' }}">
+      </picture>
+
+
+
+      <!--
+        <div class="first_logo_cont">
+        <div class="marketplace_by">A Marketplace by</div>
+
+           <a target="_blank" href="https://amwoodo.com/">
+            <img style="width:168px;" class="amwoodo_footer_logo" src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Amwoodo_Logo_BLACK_1.png?v=1727073438">
+          </a>
+        </div>
+      -->
+      <!--
+        <div class="first_logo_cont">
+        <div class="supporetd_text_has supporetd_text_has_sec">
+           Supported By
+        </div>
+
+        <img class="zerodha_logo" src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Rainmatter_logo.png?v=1726661626" />
+        <img class="upay_logo" src="https://cdn.shopify.com/s/files/1/0717/1538/9660/files/Upaya_Logo_Dark_BG.png?v=1726652603" />
+        </div>
+      -->
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var accordions = document.querySelectorAll('.accordian-head');
+
+    // Open the first accordion by default
+    var firstAccordionBody = accordions[0].nextElementSibling;
+    firstAccordionBody.classList.add('active');
+    accordions[0].classList.add('active');
+
+    // Add event listener for all accordions
+    accordions.forEach(function(accordion) {
+      accordion.addEventListener('click', function() {
+        var accordionBody = this.nextElementSibling;
+
+        // Toggle the clicked accordion body
+        accordionBody.classList.toggle('active');
+        this.classList.toggle('active');
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "TW-Footer",
+  "class": "section--footer",
+  "settings":[
+    {
+      "type":"text",
+      "id":"copyright-text",
+      "label":"Copyright text"
+    },
+    {
+      "type":"image_picker",
+      "id":"poweredby_desktop",
+      "label":"Market place Image Desktop"
+    },
+       {
+      "type":"image_picker",
+      "id":"poweredby_mobile",
+      "label":"Market place Image Mobile"
+    },
+    {
+      "type":"image_picker",
+      "id": "image-Logo",
+      "label": "Logo"
+    },
+         {
+        "type": "text",
+        "label": "custom body font family",
+        "id": "custom_body_font_family",
+        "info": "If you have a custom body font family enter the name of the font family here"
+      }, {
+        "type": "color",
+        "label": "Div Color",
+        "id": "div_color",
+        "default": "#121212"
+      },
+     {
+        "type": "color",
+        "label": "Text Color",
+        "id": "text_color",
+        "default": "#fff"
+      },
+    {
+        "type": "color",
+        "label": "Link Color",
+        "id": "link_color",
+        "default": "#fff"
+      }
+    ,
+    {
+        "type": "color",
+        "label": "Sign Up Button Color",
+        "id": "btn_color",
+        "default": "#0E593E"
+      },
+        {
+        "type": "range",
+        "label": "heading font size",
+        "id": "heading_font_size",
+        "default": 24,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px"
+      },
+    {
+      "type": "range",
+      "label": "body font size",
+      "id": "body_font_size",
+      "default": 15,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    }
+  ],
+  "max_blocks": 15,
+  "blocks": [
+    {
+      "type": "left-menu",
+      "name": "Left Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu-title",
+          "label": "Title",
+          "default": "Info"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "default": "footer",
+          "info": "This menu won't show submenu items."
+        }
+      ]
+    },
+    {
+      "type": "mid-menu",
+      "name": "Mid Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu-title",
+          "label": "Title",
+          "default": "Info"
+        },
+        {
+          "type": "link_list",
+          "id": "menu-1",
+          "label": "Menu for iameco",
+          "default": "footer",
+          "info": "This menu won't show submenu items."
+        },
+        {
+          "type": "link_list",
+          "id": "menu-2",
+          "label": "Menu for Dencrus",
+          "default": "footer",
+          "info": "This menu won't show submenu items."
+        },
+        {
+          "type": "link_list",
+          "id": "menu-3",
+          "label": "Menu for Shaveco",
+          "default": "footer",
+          "info": "This menu won't show submenu items."
+        }
+      ]
+    },
+    {
+      "type": "right-top-menu",
+      "name": "Right Top Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu-title",
+          "label": "Title",
+          "default": "Info"
+        }
+      ]
+    },
+    {
+      "type":"social-menu-1",
+      "name": "Social Menu-1",
+      "settings": [
+        {
+          "type":"image_picker",
+          "id": "image1",
+          "label": "Image 1"
+        },
+        {
+          "type":"url",
+          "id": "url1",
+          "label": "URL 1"
+        }
+      ]
+    },
+    {
+      "type":"social-menu-2",
+      "name": "Social Menu-2",
+      "settings": [
+        {
+          "type":"image_picker",
+          "id": "image1",
+          "label": "Image 1"
+        },
+        {
+          "type":"url",
+          "id": "url1",
+          "label": "URL 1"
+        }
+      ]
+    },
+    {
+      "type":"social-menu-3",
+      "name": "Social Menu-3",
+      "settings": [
+        {
+          "type":"image_picker",
+          "id": "image1",
+          "label": "Image 1"
+        },
+        {
+          "type":"url",
+          "id": "url1",
+          "label": "URL 1"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name":"TW-Footer"
+    }
+  ]
+}
+{% endschema %}

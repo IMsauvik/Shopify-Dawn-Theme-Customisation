@@ -1,0 +1,644 @@
+{% comment %}
+  Section: Popup - Limited Time Deal (Two Column, Confetti, with Variant Swatches)
+  Renders a popup with a featured product, variant selection, countdown timer,
+  redeem button, and confetti effect. Includes Ajax cart, session storage,
+  quantity lock, timer expiration, and dynamic variant updates.
+{% endcomment %}
+
+{% comment %} -------- CSS Styles (Enhanced, Two Column, New Colors, Variant Swatches) -------- {% endcomment %}
+<style>
+   /* Basic Reset/Defaults */
+   .popup-limited-deal__overlay *,
+   .popup-limited-deal__overlay *::before,
+   .popup-limited-deal__overlay *::after {
+     box-sizing: border-box;
+   }
+
+   /* Overlay */
+   .popup-limited-deal__overlay {
+     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+     background-color: rgba(0, 0, 0, 0.75);
+     /* MODIFIED: Increased z-index to fix confetti visibility */
+     z-index: 10000;
+     display: flex; align-items: center; justify-content: center;
+     padding: 20px; opacity: 0; visibility: hidden;
+     transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+     backdrop-filter: blur(3px);
+   }
+
+   .popup-limited-deal__overlay.is-visible {
+     opacity: 1; visibility: visible;
+     transition: opacity 0.4s ease, visibility 0s linear 0s;
+   }
+
+   /* Container */
+   .popup-limited-deal__container {
+     background-color: #ffffff; padding: 30px 35px; border-radius: 12px;
+     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: left;
+     max-width: 800px; /* Slightly wider for swatches */ width: 100%;
+     position: relative; animation: popup-scale-in 0.5s cubic-bezier(0.175, 0.885, 0.320, 1.275) forwards;
+     transform: scale(0.9); overflow-y: auto; max-height: 90vh;
+     /* border: 8px solid #1d4706; */
+   }
+
+   .popup-limited-deal__overlay.is-visible .popup-limited-deal__container { transform: scale(1); }
+   @keyframes popup-scale-in {
+     from { transform: scale(0.9); opacity: 0.8; }
+     to { transform: scale(1); opacity: 1; }
+   }
+
+   /* Close Button */
+   .popup-limited-deal__close {
+     position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.05);
+     border: none; padding: 8px; cursor: pointer; line-height: 0;
+     color: #555; transition: all 0.2s ease; border-radius: 50%;
+     width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+     z-index: 10;
+   }
+   .popup-limited-deal__close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2px; }
+   .popup-limited-deal__close:hover { background: rgba(0,0,0,0.1); color: #000; transform: rotate(90deg); }
+
+   /* Headline */
+   .popup-limited-deal__headline {
+     font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 25px 0;
+     font-weight: 700; color: #222; line-height: 1.2; text-align: center;
+     font-family: Raleway-Bold, sans-serif;
+   }
+
+   /* --- Two Column Layout --- */
+   .popup-limited-deal__layout { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+   .popup-limited-deal__left-col { flex: 1 1 40%; min-width: 200px; }
+   .popup-limited-deal__right-col { flex: 1 1 55%; display: flex; flex-direction: column; gap: 6px; }
+
+   /* Image Styles */
+   .popup-limited-deal__image-wrapper {
+     width: 100%; line-height: 0; border-radius: 8px; overflow: hidden;
+     border: 1px solid #a9ce98; position: relative;
+   }
+   .popup-limited-deal__image-wrapper::after {
+     content: ''; position: absolute; inset: 0; border-radius: inherit;
+     box-shadow: inset 0 0 10px rgba(0,0,0,0.05); pointer-events: none;
+   }
+   .popup-limited-deal__image-wrapper img {
+     width: 100%; height: auto; display: block;
+     transition: opacity 0.4s ease, transform 0.4s ease; /* NEW: Added opacity transition */
+   }
+   /* NEW: Class for fade effect during image swap */
+   .popup-limited-deal__image-wrapper img.is-updating { opacity: 0.3; transform: scale(0.98); }
+
+
+   /* --- Right Column Content --- */
+   .popup-limited-deal__details { }
+   .popup-limited-deal__product-title {
+    
+     font-size: clamp(1.6rem, 4vw, 1.8rem); margin: 0 0 5px 0;
+     font-weight: 600; line-height: 1.3; font-family: Raleway-Regular, sans-serif;
+   }
+   .popup-limited-deal__product-title a { text-decoration: none; color: inherit; transition: color 0.2s ease; }
+   .popup-limited-deal__product-title a:hover { color: #1d4706; text-decoration: underline; }
+   .popup-limited-deal__product-price { font-family: 'Raleway-Bold'; margin: 0 0 2px 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; min-height: 40px; }
+   .popup-limited-deal__price-item--sale { font-size: clamp(2.6rem, 5vw, 2.1rem); font-weight: 700; color: #1d4706; }
+   .popup-limited-deal__price-item--compare { font-size: clamp(2rem, 3.5vw, 1.5rem); color: #6c757d; text-decoration: line-through; }
+
+   /* --- NEW: Variant Swatch Styles --- */
+   .popup-variant-selector { margin-top: 10px; }
+   .popup-variant-selector__label { font-size: 16px;font-family: 'Raleway-Bold'; color: #333; font-weight: 600; margin-bottom: 10px; display: block; }
+   .popup-variant-selector__swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+   .popup-variant-swatch { position: relative; }
+   .popup-variant-swatch input[type="radio"] { opacity: 0; position: absolute; width: 1px; height: 1px; }
+   .popup-variant-swatch label {
+     display: flex; align-items: center; justify-content: center;
+     width: 48px; height: 48px; border-radius: 50%;
+     border: 2px solid #ddd; cursor: pointer;
+     transition: all 0.2s ease;
+     background-size: cover; background-position: center;
+     position: relative; overflow: hidden;
+     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+   }
+   .popup-variant-swatch label:hover { border-color: #a9ce98; transform: scale(1.05); }
+   .popup-variant-swatch input[type="radio"]:checked + label {
+     border-color: #1d4706; border-width: 3px;
+     box-shadow: 0 2px 8px rgba(29, 71, 6, 0.3);
+   }
+   .popup-variant-swatch input[type="radio"]:checked + label::after {
+     content: '✓'; font-family: sans-serif;
+     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+     display: flex; align-items: center; justify-content: center;
+     background-color: rgba(29, 71, 6, 0.5);
+     color: white; font-size: 20px; font-weight: bold;
+     transform: scale(1); opacity: 1;
+     transition: all 0.2s ease;
+   }
+   .popup-variant-swatch input[type="radio"]:not(:checked) + label::after {
+     transform: scale(0); opacity: 0;
+   }
+   .popup-variant-swatch-text { font-size: 0.9rem; padding: 0 8px; background-color: white; border-radius: 4px; border: 1px solid #eee; }
+
+   /* --- Timer, Discount, Form, Button Styles (largely unchanged) --- */
+   /* Beautiful Timer */
+   .popup-limited-deal__timer { background: #f0f5ed; padding: 15px 20px; border-radius: 10px; border: 1px solid #a9ce98; text-align: center; }
+   .popup-limited-deal__timer-label { display: block; font-size: 1.3rem; margin-bottom: 12px; color: #1d4706; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+   .popup-limited-deal__timer-digits { font-family: Raleway-Regular, sans-serif; font-size: clamp(2.2rem, 6vw, 2.6rem); font-weight: 700; color: #1d4706; line-height: 1; display: flex; justify-content: center; align-items: center; gap: 8px; }
+   .popup-limited-deal__timer-digits .digit-group { background-color: #ffffff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #a9ce98; min-width: 2.5ch; display: inline-block; letter-spacing: 1px; }
+   .popup-limited-deal__timer-digits .separator { font-size: 1.8rem; color: #a9ce98; font-weight: normal; padding: 0 2px; }
+   /* Discount Code */
+   .popup-limited-deal__discount { background-color: #eaf3e7; border: 1px dashed #a9ce98; padding: 10px 15px; border-radius: 6px; text-align: center; }
+   .popup-limited-deal__discount-label { display: block; font-size: 0.9rem; color: #555; margin-bottom: 4px; text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px; }
+   .popup-limited-deal__discount-code { font-family: Raleway-Regular, sans-serif; font-size: 1.4rem; font-weight: bold; color: #1d4706; user-select: all; }
+   /* Form & Button */
+   .popup-limited-deal__form { margin: 0; }
+   .popup-limited-deal__container .popup-limited-deal__button { font-family: 'Raleway-Bold'; display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 16px 25px; font-size: clamp(1.5rem, 4vw, 1.6rem); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-radius: 8px; background: #0f2e16; border: 2px solid #1d4706; color: #fff; transition: all 0.3s ease; text-align: center; box-sizing: border-box; line-height: 1.2; appearance: none; -webkit-appearance: none; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(29, 71, 6, 0.3); }
+   .popup-limited-deal__container .popup-limited-deal__button:hover:not([disabled]) { background: #153804; border-color: #a9ce98; box-shadow: 0 5px 15px rgba(29, 71, 6, 0.4); transform: translateY(-2px); }
+   .popup-limited-deal__container .popup-limited-deal__button:active:not([disabled]) { transform: translateY(0) scale(0.98); box-shadow: 0 2px 8px rgba(29, 71, 6, 0.2); }
+   .popup-limited-deal__container .popup-limited-deal__button[disabled] { opacity: 0.6; cursor: not-allowed; background: #cccccc; border-color: #cccccc; color: #666666; box-shadow: none; transform: none; }
+   .popup-limited-deal__container .popup-limited-deal__button .loading-overlay__spinner { display: none; margin-left: 10px; width: 1.6rem; height: 1.6rem; vertical-align: middle; }
+   .popup-limited-deal__container .popup-limited-deal__button.is-loading .loading-overlay__spinner { display: inline-block !important; }
+   .popup-limited-deal__container .popup-limited-deal__button.is-loading .popup-limited-deal__button-text { opacity: 0.6; }
+   /* Messages */
+   .popup-limited-deal__message { margin-top: 10px; font-size: 1.4rem; display: none; padding: 10px 15px; border-radius: 5px; text-align: center; font-weight: 500; }
+   .popup-limited-deal__message.success { color: #1d4706; background-color: #eaf3e7; border: 1px solid #a9ce98; }
+   .popup-limited-deal__message.error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+   .popup-limited-deal__message.info { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; }
+
+   /* --- Responsiveness --- */
+   @media (max-width: 768px) {
+      .popup-limited-deal__product-price { min-height: 30px; }
+     .popup-limited-deal__container { padding: 25px; max-width: 95%; border-width: 6px; }
+     .popup-limited-deal__layout { flex-direction: column; gap: 20px; align-items: center; }
+     .popup-limited-deal__left-col, .popup-limited-deal__right-col { flex-basis: 100%; width: 100%; }
+     .popup-limited-deal__right-col { gap: 15px; align-items: center; text-align: center; }
+     .popup-limited-deal__product-price { justify-content: center; }
+     .popup-limited-deal__image-wrapper { max-width: 300px; margin: 0 auto; }
+     .popup-variant-selector__label { text-align: center; }
+     .popup-variant-selector__swatches { justify-content: center; }
+     .popup-limited-deal__form, .popup-limited-deal__timer { width:100%; }
+   }
+   @media (max-width: 480px) {
+     .popup-limited-deal__container { padding: 15px; border-width: 4px; }
+     .popup-limited-deal__headline { font-size: 1.6rem; margin-bottom: 20px; }
+     .popup-limited-deal__product-title { font-size: 1.5rem; }
+     .popup-limited-deal__price-item--sale { font-size: 1.6rem; }
+     .popup-limited-deal__price-item--compare { font-size: 1.2rem; }
+     .popup-limited-deal__timer-digits { font-size: 2rem; gap: 5px; }
+     .popup-limited-deal__container .popup-limited-deal__button { font-size: 1.4rem; padding: 14px 20px; }
+     .popup-variant-swatch label { width: 42px; height: 42px; }
+   }
+</style>
+
+{%- liquid
+  assign section_id = section.id
+  assign product = section.settings.popup_product
+  assign show_popup = section.settings.enable_popup
+  assign timer_duration_minutes = section.settings.timer_duration_minutes | default: 10
+  assign timer_duration_seconds = timer_duration_minutes | times: 60
+
+  assign use_closure_storage = section.settings.use_session_storage_closure
+  assign persist_timer = section.settings.persist_timer_session
+  assign section_id_str = section_id | replace: '-', '_'
+
+  assign discount_code = section.settings.discount_code | strip
+  assign text_offer_expired = 'sections.popup_limited_deal.offer_expired' | t: default: 'Offer Expired'
+  assign text_already_in_cart = 'sections.popup_limited_deal.already_in_cart' | t: default: 'Offer already claimed (in cart)'
+
+  assign initial_variant = product.selected_or_first_available_variant
+  assign has_variants = false
+  if product.variants.size > 1 and product.has_only_default_variant == false
+    assign has_variants = true
+  endif
+-%}
+
+{% comment %} -------- HTML Structure (Two Column with Variants) -------- {% endcomment %}
+{%- if show_popup and product != blank and initial_variant != blank -%}
+  <div
+    id="PopupLimitedTimeDeal-{{ section_id }}"
+    class="popup-limited-deal__overlay"
+    data-section-id="{{ section_id }}"
+    data-use-closure-storage="{{ use_closure_storage }}"
+    data-persist-timer="{{ persist_timer }}"
+    data-storage-key-closed="popup_{{ section_id_str }}_closed"
+    data-storage-key-timer="popup_{{ section_id_str }}_timer_end"
+    style="display: none;"
+  >
+    <div class="popup-limited-deal__container" role="dialog" aria-modal="true" aria-labelledby="PopupHeadline-{{ section_id }}">
+      <button type="button" class="popup-limited-deal__close" aria-label="{{ 'general.accessibility.close_modal' | t }}">
+        {% render 'icon-close' %}
+      </button>
+
+      <h2 id="PopupHeadline-{{ section_id }}" class="popup-limited-deal__headline">{{ section.settings.headline | escape }}</h2>
+
+      <div class="popup-limited-deal__layout">
+        {% comment %} --- Left Column --- {% endcomment %}
+        <div class="popup-limited-deal__left-col">
+          <div class="popup-limited-deal__image-wrapper">
+            <a href="{{ product.url | default: '#' }}" aria-label="{{ product.title | escape }}">
+              <img
+                src="{{ initial_variant.featured_image | default: product.featured_media | image_url: width: 500 }}"
+                alt="{{ initial_variant.featured_image.alt | default: product.title | escape }}"
+                loading="lazy"
+                width="{{ initial_variant.featured_image.width | default: product.featured_media.width }}"
+                height="{{ initial_variant.featured_image.height | default: product.featured_media.height }}"
+                data-popup-image="{{ section_id }}"
+              >
+            </a>
+          </div>
+        </div>
+
+        {% comment %} --- Right Column --- {% endcomment %}
+        <div class="popup-limited-deal__right-col">
+          <div class="popup-limited-deal__details">
+            {% comment %} MODIFIED: Added data attribute to target this element in JS {% endcomment %}
+            <h3 class="popup-limited-deal__product-title" data-popup-product-title="{{ section_id }}">
+              <a href="{{ product.url | default: '#' }}">{{ product.title | escape }}</a>
+            </h3>
+
+            <div class="popup-limited-deal__product-price" data-popup-price-wrapper="{{ section_id }}">
+              <span class="popup-limited-deal__price-item popup-limited-deal__price-item--sale" data-popup-price-sale="{{ section_id }}">
+                {{- initial_variant.price | money_with_currency -}}
+              </span>
+              {%- if initial_variant.compare_at_price > initial_variant.price -%}
+                <span class="popup-limited-deal__price-item popup-limited-deal__price-item--compare" data-popup-price-compare="{{ section_id }}">
+                  {{- initial_variant.compare_at_price | money_with_currency -}}
+                </span>
+              {%- else -%}
+                 <span class="popup-limited-deal__price-item popup-limited-deal__price-item--compare" data-popup-price-compare="{{ section_id }}" style="display: none;"></span>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {% comment %} NEW: Variant Selector {% endcomment %}
+          {%- if has_variants -%}
+            {%- for option in product.options_with_values -%}
+              {%- if option.name == 'Print' or option.name == 'Color' or option.name == 'Style' or forloop.first %}
+                <div class="popup-variant-selector" data-variant-selector-container>
+                  <span class="popup-variant-selector__label">Pick Your Bloom:</span>
+                  <div class="popup-variant-selector__swatches">
+                    {%- for variant in product.variants -%}
+                       {%- assign option_index = option.position | minus: 1 -%}
+                       {%- assign option_value = variant.options[option_index] -%}
+                       <div class="popup-variant-swatch">
+                         <input
+                           type="radio"
+                           id="popup-variant-{{ section_id }}-{{ variant.id }}"
+                           name="popup-variant-{{ section_id }}"
+                           value="{{ variant.id }}"
+                           data-variant-id="{{ variant.id }}"
+                         >
+                         <label
+                           for="popup-variant-{{ section_id }}-{{ variant.id }}"
+                           title="{{ option_value | escape }}"
+                           style="background-image: url('{{ variant.featured_image | image_url: width: 100, height: 100, crop: 'center' }}');"
+                         >
+                           {%- if variant.featured_image == nil -%}
+                             <span class="popup-variant-swatch-text">{{ option_value | escape | slice: 0, 2 }}</span>
+                           {%- endif -%}
+                         </label>
+                       </div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- if discount_code != blank -%}
+             <div class="popup-limited-deal__discount">
+               <span class="popup-limited-deal__discount-label">{{ 'sections.popup_limited_deal.discount_label' | t: default: 'Your Discount Code:' }}</span>
+               <span class="popup-limited-deal__discount-code">{{ discount_code }}</span>
+             </div>
+           {%- endif -%}
+           
+           {%- if section.settings.show_timer -%}
+             <div class="popup-limited-deal__timer" data-timer-duration="{{ timer_duration_seconds }}">
+               <span class="popup-limited-deal__timer-label">{{ section.settings.timer_label | escape }}</span>
+               <div class="popup-limited-deal__timer-digits">
+                 <span class="digit-group popup-limited-deal__timer-minutes">--</span>
+                 <span class="separator">:</span>
+                 <span class="digit-group popup-limited-deal__timer-seconds">--</span>
+               </div>
+             </div>
+           {%- endif -%}
+
+          {% comment %} -------- Redeem Form -------- {% endcomment %}
+          <form
+            id="popup-product-form-{{ section_id }}"
+            action="{{ routes.cart_add_url }}"
+            method="post"
+            class="popup-limited-deal__form"
+            enctype="multipart/form-data"
+            data-type="add-to-cart-form"
+          >
+            <input type="hidden" name="id" value="{{ initial_variant.id }}" data-variant-id-input>
+            <input type="hidden" name="quantity" value="1">
+
+            <button type="submit" name="add" class="popup-limited-deal__button" data-redeem-button>
+              <span class="popup-limited-deal__button-text" data-button-text>
+                {{ section.settings.add_to_cart_text | escape }}
+              </span>
+              <div class="loading-overlay__spinner">{% render 'icon-spinner' %}</div>
+            </button>
+            <div class="popup-limited-deal__message" data-form-message></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% comment %} MODIFIED: Added variant_title to the JSON data island {% endcomment %}
+  <script id="PopupVariantData-{{ section_id }}" type="application/json">
+    {
+      {% for variant in product.variants %}
+        {%- assign has_compare_price = false -%}
+        {%- if variant.compare_at_price > variant.price -%}
+          {%- assign has_compare_price = true -%}
+        {%- endif -%}
+        "{{ variant.id }}": {
+          "id": {{ variant.id }},
+          "available": {{ variant.available | json }},
+          "price": "{{ variant.price | money_with_currency }}",
+          "compare_at_price": "{{ variant.compare_at_price | money_with_currency }}",
+          "has_compare_price": {{ has_compare_price | json }},
+          "image_src": "{{ variant.featured_image | default: product.featured_image | image_url: width: 500 }}",
+          "image_alt": {{ variant.featured_image.alt | default: product.title | json }},
+          "variant_title": {{ variant.title | json }}
+        }
+        {% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    }
+  </script>
+
+  {% comment %} -------- JavaScript -------- {% endcomment %}
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+  <script>
+    (function() {
+      const sectionId = '{{ section_id }}';
+      const popupSection = document.getElementById(`PopupLimitedTimeDeal-${sectionId}`);
+      if (!popupSection) return;
+
+      // --- Elements ---
+      const closeButton = popupSection.querySelector('.popup-limited-deal__close');
+      const timerElement = popupSection.querySelector('.popup-limited-deal__timer');
+      const form = popupSection.querySelector('.popup-limited-deal__form');
+      const redeemButton = popupSection.querySelector('[data-redeem-button]');
+      const buttonTextElement = popupSection.querySelector('[data-button-text]');
+      const messageElement = popupSection.querySelector('[data-form-message]');
+      const variantDataScript = document.getElementById(`PopupVariantData-${sectionId}`);
+      const variantsData = JSON.parse(variantDataScript.textContent);
+      const variantSelectorContainer = popupSection.querySelector('[data-variant-selector-container]');
+      // NEW: Added selector for the product title
+      const productTitleElement = popupSection.querySelector(`[data-popup-product-title="${sectionId}"] a`);
+      const imageElement = popupSection.querySelector(`[data-popup-image="${sectionId}"]`);
+      const priceWrapper = popupSection.querySelector(`[data-popup-price-wrapper="${sectionId}"]`);
+      const salePriceElement = priceWrapper.querySelector(`[data-popup-price-sale="${sectionId}"]`);
+      const comparePriceElement = priceWrapper.querySelector(`[data-popup-price-compare="${sectionId}"]`);
+      const variantIdInput = form.querySelector('[data-variant-id-input]');
+
+
+      // --- Settings ---
+      const useClosureStorage = popupSection.dataset.useClosureStorage === 'true';
+      const persistTimer = popupSection.dataset.persistTimer === 'true';
+      const storageKeyClosed = popupSection.dataset.storageKeyClosed;
+      const storageKeyTimer = popupSection.dataset.storageKeyTimer;
+      const showTimer = {{ section.settings.show_timer }};
+      const textOfferExpired = '{{ text_offer_expired | escape }}';
+      const textAlreadyInCart = '{{ text_already_in_cart | escape }}';
+      const textSoldOut = '{{ 'products.product.sold_out' | t | escape }}';
+      const textAddToCart = '{{ section.settings.add_to_cart_text | escape }}';
+      // NEW: Store the base product title to construct the dynamic title
+      const baseProductTitle = '{{ product.title | escape }}';
+      let currentVariantId = '{{ initial_variant.id }}';
+
+      // --- State ---
+      let timerInterval;
+      let isTimerExpired = false;
+      let isItemAlreadyInCart = false;
+
+      // --- Helper Functions ---
+      const showPopup = () => { if (useClosureStorage && sessionStorage.getItem(storageKeyClosed) === 'true') { return; } popupSection.style.display = 'flex'; requestAnimationFrame(() => { popupSection.classList.add('is-visible'); }); };
+      const hidePopup = () => { popupSection.classList.remove('is-visible'); setTimeout(() => { if (!popupSection.classList.contains('is-visible')) { popupSection.style.display = 'none'; } }, 400); if (useClosureStorage) { try { sessionStorage.setItem(storageKeyClosed, 'true'); } catch (e) { /* ignore */ } } clearMessage(); };
+      const showMessage = (text, type = 'info') => { if (messageElement) { messageElement.textContent = text; messageElement.className = `popup-limited-deal__message ${type}`; messageElement.style.display = 'block'; }};
+      const clearMessage = () => { if (messageElement) { messageElement.style.display = 'none'; messageElement.textContent = ''; messageElement.className = 'popup-limited-deal__message'; }};
+      function openCartAfterSubmission() { if (typeof window.openCartDrawer === 'function') window.openCartDrawer(); else if (document.querySelector('.cart-drawer')) document.querySelector('.cart-drawer').classList.add('active'); else if (document.querySelector('[data-cart-drawer]')) document.querySelector('[data-cart-drawer]').classList.add('open'); else { const cartTriggers = document.querySelectorAll('.cart-icon, .site-header__cart, [data-cart-toggle], [data-drawer-trigger="cart"], a[href$="/cart"]'); if (cartTriggers.length > 0) cartTriggers[0].click(); else window.location.href = window.Shopify.routes.root + 'cart'; } }
+
+      // --- MODIFIED: Function to update the UI, now includes title update ---
+      const updateUIForVariant = (variantId) => {
+          const variant = variantsData[variantId];
+          if (!variant) return;
+
+          currentVariantId = variant.id;
+
+          // NEW: Update product title text
+          if (productTitleElement) {
+              let newTitle = baseProductTitle;
+              // Shopify's default variant is named "Default Title", we don't need to show that.
+              if (variant.variant_title && variant.variant_title !== 'Default Title') {
+                  newTitle = `${baseProductTitle} - ${variant.variant_title}`;
+              }
+              productTitleElement.textContent = newTitle;
+          }
+
+          if (imageElement && imageElement.src !== variant.image_src) {
+            imageElement.classList.add('is-updating');
+            setTimeout(() => {
+                imageElement.src = variant.image_src;
+                imageElement.alt = variant.image_alt;
+                imageElement.onload = () => imageElement.classList.remove('is-updating');
+            }, 200);
+          }
+
+          if (salePriceElement) salePriceElement.textContent = variant.price;
+          if (comparePriceElement) {
+              if (variant.has_compare_price) {
+                  comparePriceElement.textContent = variant.compare_at_price;
+                  comparePriceElement.style.display = 'inline';
+              } else {
+                  comparePriceElement.style.display = 'none';
+              }
+          }
+
+          if (variantIdInput) variantIdInput.value = variant.id;
+          updateButtonState(variant);
+          checkInitialCartStatus();
+      };
+
+      const updateButtonState = (variant) => {
+          if (!redeemButton || !buttonTextElement) return;
+          const isAvailable = variant ? variant.available : false;
+
+          if (!isAvailable) {
+              redeemButton.disabled = true;
+              buttonTextElement.textContent = textSoldOut;
+          } else if (isTimerExpired) {
+              redeemButton.disabled = true;
+              buttonTextElement.textContent = textOfferExpired;
+          } else if (isItemAlreadyInCart) {
+              redeemButton.disabled = true;
+              buttonTextElement.textContent = textAddToCart;
+          } else {
+              redeemButton.disabled = false;
+              buttonTextElement.textContent = textAddToCart;
+          }
+          redeemButton.classList.remove('is-loading');
+      };
+
+      const initializeTimer = () => {
+        if (!timerElement || !showTimer) return;
+        const durationSeconds = parseInt(timerElement.getAttribute('data-timer-duration'), 10);
+        const minutesEl = timerElement.querySelector('.popup-limited-deal__timer-minutes');
+        const secondsEl = timerElement.querySelector('.popup-limited-deal__timer-seconds');
+
+        if (isNaN(durationSeconds) || !minutesEl || !secondsEl) {
+            if(minutesEl) minutesEl.textContent = '00'; if(secondsEl) secondsEl.textContent = '00';
+            isTimerExpired = true; updateButtonState(variantsData[currentVariantId]); return;
+        }
+
+        let endTime;
+        const storedEndTime = persistTimer ? sessionStorage.getItem(storageKeyTimer) : null;
+        if (storedEndTime && parseInt(storedEndTime) > Date.now()) { endTime = parseInt(storedEndTime); } 
+        else { if(storedEndTime && parseInt(storedEndTime) <= Date.now()) endTime = parseInt(storedEndTime); else { endTime = Date.now() + durationSeconds * 1000; if (persistTimer) try { sessionStorage.setItem(storageKeyTimer, endTime); } catch (e) { /* ignore */ } } }
+        
+        const updateTimer = () => {
+          const timeLeft = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+          if (minutesEl) minutesEl.textContent = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+          if (secondsEl) secondsEl.textContent = String(timeLeft % 60).padStart(2, '0');
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            if (minutesEl) minutesEl.textContent = '00'; if (secondsEl) secondsEl.textContent = '00';
+            if (persistTimer) try { sessionStorage.removeItem(storageKeyTimer); } catch (e) { /* ignore */ }
+            isTimerExpired = true; updateButtonState(variantsData[currentVariantId]);
+          } else {
+            isTimerExpired = false; updateButtonState(variantsData[currentVariantId]);
+          }
+        };
+        clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
+      };
+
+      const checkInitialCartStatus = async () => {
+          if (!currentVariantId) return;
+          try {
+              const cartResponse = await fetch(window.Shopify.routes.root + 'cart.js');
+              if (!cartResponse.ok) throw new Error('Could not fetch cart.');
+              const cartData = await cartResponse.json();
+              const itemInCart = cartData.items.find(item => item.variant_id.toString() === currentVariantId.toString());
+
+              isItemAlreadyInCart = !!itemInCart;
+              updateButtonState(variantsData[currentVariantId]);
+          } catch (error) {
+              console.error("Limited Deal - Error checking cart status:", error);
+              isItemAlreadyInCart = false;
+              updateButtonState(variantsData[currentVariantId]);
+          }
+      };
+
+      const handleFormSubmit = async (event) => {
+        event.preventDefault();
+        clearMessage();
+        const selectedVariant = variantsData[currentVariantId];
+
+        if (isTimerExpired || !selectedVariant.available || isItemAlreadyInCart) {
+             if (isItemAlreadyInCart) showMessage(textAlreadyInCart, 'info');
+             else if (isTimerExpired) showMessage(textOfferExpired, 'info');
+             return;
+        }
+
+        redeemButton.classList.add('is-loading'); redeemButton.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const addResponse = await fetch(window.Shopify.routes.root + 'cart/add.js', { method: 'POST', body: formData });
+            if (!addResponse.ok) { let errorData = { description: `HTTP error! status: ${addResponse.status}` }; try { errorData = await addResponse.json(); } catch (e) {/* ignore */} throw new Error(errorData.description || errorData.message || `HTTP error! status: ${addResponse.status}`); }
+            const addedItemData = await addResponse.json();
+            if (addedItemData.status >= 400 || addedItemData.error || !addedItemData.id) { throw new Error(addedItemData.description || addedItemData.message || 'Error redeeming offer - response indicates failure.'); }
+            
+            // MODIFIED: Increased confetti z-index and particle count for fix and better effect
+            if (typeof confetti === 'function') {
+               const rect = redeemButton.getBoundingClientRect();
+               const originX = (rect.left + rect.right) / 2 / window.innerWidth;
+               const originY = (rect.top + rect.bottom) / 2 / window.innerHeight;
+               confetti({ particleCount: 150, spread: 90, origin: { x: originX, y: originY }, angle: 90, startVelocity: 35, zIndex: 10001 });
+            }
+            showMessage('Offer Redeemed & Added to Cart!', 'success');
+            isItemAlreadyInCart = true; updateButtonState(selectedVariant);
+            
+            if (typeof window.PubSub?.publish === 'function') window.PubSub.publish('cart:update', { source: 'limited-deal-popup', cartData: addedItemData });
+            else if (document.documentElement.dispatchEvent) document.documentElement.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { source: 'limited-deal-popup', cartData: addedItemData }}));
+
+            setTimeout(() => { hidePopup(); setTimeout(openCartAfterSubmission, 500); }, 1800);
+        } catch (error) {
+            console.error('Limited Deal - Error during redeem process:', error);
+            showMessage(error.message || 'Could not redeem offer.', 'error');
+            updateButtonState(selectedVariant);
+        }
+      };
+
+      // --- Event Listeners ---
+      if (closeButton) closeButton.addEventListener('click', hidePopup);
+      popupSection.addEventListener('click', (e) => { if (e.target === popupSection) hidePopup(); });
+      if (form) form.addEventListener('submit', handleFormSubmit);
+
+      if (variantSelectorContainer) {
+          variantSelectorContainer.addEventListener('change', (event) => {
+              if (event.target.name.startsWith('popup-variant')) {
+                  const newVariantId = event.target.value;
+                  updateUIForVariant(newVariantId);
+              }
+          });
+      }
+
+      // --- Initialize & Trigger Popup ---
+      const initializePopup = async () => {
+          const firstAvailableVariantId = Object.keys(variantsData).find(id => variantsData[id].available);
+          const initialIdToSelect = firstAvailableVariantId || '{{ initial_variant.id }}';
+          const initialRadio = popupSection.querySelector(`input[value="${initialIdToSelect}"]`);
+          if (initialRadio) {
+              initialRadio.checked = true;
+              currentVariantId = initialIdToSelect;
+          }
+          updateUIForVariant(currentVariantId);
+          initializeTimer();
+          const showDelay = 3000;
+          setTimeout(() => { showPopup(); }, showDelay);
+      }
+
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initializePopup); } else { initializePopup(); }
+    })();
+  </script>
+{%- else -%}
+  {% comment %} Render nothing if disabled or product invalid {% endcomment %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Popup - Limited Time Deal",
+  "tag": "section",
+  "class": "shopify-section--popup-limited-deal",
+  "settings": [
+    { "type": "header", "content": "Popup Control" },
+    { "type": "checkbox", "id": "enable_popup", "label": "Enable Popup", "info": "Master switch to turn this popup on/off.", "default": false },
+
+    { "type": "header", "content": "Product & Content" },
+    { "type": "product", "id": "popup_product", "label": "Product to Feature", "info": "Select the product for the deal. If the product has variants (like 'Print' or 'Color'), they will be shown as selectable swatches." },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "🔥 Limited Time Deal! 🔥" },
+    { "type": "text", "id": "discount_code", "label": "Discount Code (Optional)", "info": "Display a discount code to the user. Leave blank to hide." },
+    { "type": "text", "id": "add_to_cart_text", "label": "Redeem Button Text", "default": "Redeem Offer Now" },
+
+    { "type": "header", "content": "Countdown Timer" },
+    { "type": "checkbox", "id": "show_timer", "label": "Show Countdown Timer", "default": true },
+    { "type": "range", "id": "timer_duration_minutes", "label": "Timer Duration (Minutes)", "min": 1, "max": 60, "step": 1, "unit": "min", "default": 15 },
+    { "type": "text", "id": "timer_label", "label": "Timer Label Text", "default": "Offer Ends In:" },
+
+    { "type": "header", "content": "Behavior (Session Storage)" },
+    { "type": "checkbox", "id": "use_session_storage_closure", "label": "Remember Popup Closure", "info": "If checked, popup won't show again after being closed during the current browser session.", "default": true },
+    { "type": "checkbox", "id": "persist_timer_session", "label": "Persist Timer Across Refreshes", "info": "If checked, timer continues from where it left off if user refreshes or navigates away and back during the same browser session.", "default": true }
+  ],
+  "presets": [
+    { "name": "Popup - Limited Time Deal" }
+  ],
+  "locales": {
+    "en": { "sections": { "popup_limited_deal": { "discount_label": "Your Discount Code:", "offer_expired": "Offer Expired", "already_in_cart": "Offer already claimed (in cart)" }}},
+    "es": { "sections": { "popup_limited_deal": { "discount_label": "Tu Código de Descuento:", "offer_expired": "Oferta Expirada", "already_in_cart": "Oferta ya reclamada (en carrito)" }}},
+    "de": { "sections": { "popup_limited_deal": { "discount_label": "Ihr Rabattcode:", "offer_expired": "Angebot Abgelaufen", "already_in_cart": "Angebot bereits beansprucht (im Warenkorb)" }}},
+    "fr": { "sections": { "popup_limited_deal": { "discount_label": "Votre Code Promo :", "offer_expired": "Offre Expirée", "already_in_cart": "Offre déjà réclamée (dans le panier)" }}}
+  }
+}
+{% endschema %}
