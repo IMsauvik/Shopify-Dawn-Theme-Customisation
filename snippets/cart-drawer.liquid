@@ -1,7 +1,6 @@
-
 {% comment %}
-  Simplified Cart Drawer that works with default Shopify sections
-  
+  Renders cart drawer
+
   Usage:
   {% render 'cart-drawer' %}
 {% endcomment %}
@@ -32,15 +31,7 @@
         <div class="drawer__inner-empty">
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
-              <div class="empty-cart-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="8" cy="21" r="1"></circle>
-                  <circle cx="19" cy="21" r="1"></circle>
-                  <path d="m2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43h-15.12"></path>
-                </svg>
-              </div>
               <h2 class="cart__empty-text">{{ 'sections.cart.empty' | t }}</h2>
-              <p class="cart__empty-description">Looks like you haven't added anything to your cart yet. Start shopping to fill it up!</p>
               <button
                 class="drawer__close"
                 type="button"
@@ -49,17 +40,15 @@
               >
                 {% render 'icon-close' %}
               </button>
-              <a href="{{ routes.all_products_collection_url }}" class="button button--primary">
+              <a href="{{ routes.all_products_collection_url }}" class="button">
                 {{ 'general.continue_shopping' | t }}
               </a>
 
               {%- if shop.customer_accounts_enabled and customer == null -%}
-                <div class="cart__login-section">
-                  <p class="cart__login-title h3">{{ 'sections.cart.login.title' | t }}</p>
-                  <p class="cart__login-paragraph">
-                    {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
-                  </p>
-                </div>
+                <p class="cart__login-title h3">{{ 'sections.cart.login.title' | t }}</p>
+                <p class="cart__login-paragraph">
+                  {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+                </p>
               {%- endif -%}
             </div>
           </div>
@@ -70,14 +59,8 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-      
       <div class="drawer__header">
-        <h2 class="drawer__heading">
-          {{ 'sections.cart.title' | t }}
-          {%- unless cart == empty -%}
-            <span class="cart-count">({{ cart.item_count }})</span>  
-          {%- endunless -%}
-        </h2>
+        <h2 class="drawer__heading">{{ 'sections.cart.title' | t }}</h2>
         <button
           class="drawer__close"
           type="button"
@@ -87,14 +70,9 @@
           {% render 'icon-close' %}
         </button>
       </div>
-
-      {%- unless cart == empty -%}
-        <!-- Progress Bar will be injected here by JavaScript -->
-      {%- endunless -%}
-
       <cart-drawer-items
         {% if cart == empty %}
-          class="is-empty"
+          class=" is-empty"
         {% endif %}
       >
         <form
@@ -107,7 +85,7 @@
             {%- if cart != empty -%}
               <div class="drawer__cart-items-wrapper">
                 <table class="cart-items" role="table">
-                  <thead role="rowgroup" class="visually-hidden">
+                  <thead role="rowgroup">
                     <tr role="row">
                       <th id="CartDrawer-ColumnProductImage" role="columnheader">
                         <span class="visually-hidden">{{ 'sections.cart.headings.image' | t }}</span>
@@ -136,11 +114,7 @@
 
                   <tbody role="rowgroup">
                     {%- for item in cart.items -%}
-                      <tr id="CartDrawer-Item-{{ item.index | plus: 1 }}" 
-                          class="cart-item{% if item.properties._offer_item or item.properties._free_gift %} cart-item--special{% endif %}" 
-                          role="row"
-                          {% if item.properties._free_gift %}data-gift="true"{% endif %}>
-                        
+                      <tr id="CartDrawer-Item-{{ item.index | plus: 1 }}" class="cart-item" role="row">
                         <td class="cart-item__media" role="cell" headers="CartDrawer-ColumnProductImage">
                           {% if item.image %}
                             {% comment %} Leave empty space due to a:empty CSS display: none rule {% endcomment %}
@@ -163,12 +137,28 @@
 
                           <a href="{{ item.url }}" class="cart-item__name h4 break">
                             {{- item.product.title | escape -}}
-                            {%- if item.properties._offer_item -%}
-                              <span class="special-offer-badge">Special</span>
-                            {%- elsif item.properties._free_gift -%}
-                              <span class="free-gift-badge">Free Gift</span>
-                            {%- endif -%}
                           </a>
+
+                          {%- if item.original_price != item.final_price -%}
+                            <div class="cart-item__discounted-prices">
+                              <span class="visually-hidden">
+                                {{ 'products.product.price.regular_price' | t }}
+                              </span>
+                              <s class="cart-item__old-price product-option">
+                                {{- item.original_price | money -}}
+                              </s>
+                              <span class="visually-hidden">
+                                {{ 'products.product.price.sale_price' | t }}
+                              </span>
+                              <strong class="cart-item__final-price product-option">
+                                {{ item.final_price | money }}
+                              </strong>
+                            </div>
+                          {%- else -%}
+                            <div class="product-option">
+                              {{ item.original_price | money }}
+                            </div>
+                          {%- endif -%}
 
                           {%- if item.product.has_only_default_variant == false
                             or item.properties.size != 0
@@ -231,11 +221,7 @@
                         <td class="cart-item__totals right" role="cell" headers="CartDrawer-ColumnTotal">
                           {%- render 'loading-spinner' -%}
                           <div class="cart-item__price-wrapper">
-                            {%- if item.properties._free_gift -%}
-                              <span class="price price--end free-price">
-                                FREE
-                              </span>
-                            {%- elsif item.original_line_price != item.final_line_price -%}
+                            {%- if item.original_line_price != item.final_line_price -%}
                               <div class="cart-item__discounted-prices">
                                 <span class="visually-hidden">
                                   {{ 'products.product.price.regular_price' | t }}
@@ -256,7 +242,7 @@
                               </span>
                             {%- endif -%}
 
-                            {%- if item.variant.available and item.unit_price_measurement and item.properties._free_gift == blank and item.properties._offer_item == blank -%}
+                            {%- if item.variant.available and item.unit_price_measurement -%}
                               <div class="unit-price caption">
                                 <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
                                 {{ item.unit_price | money }}
@@ -272,7 +258,6 @@
                             {%- endif -%}
                           </div>
                         </td>
-
                         {%- liquid
                           assign has_qty_rules = false
                           if item.variant.quantity_rule.increment > 1 or item.variant.quantity_rule.min > 1 or item.variant.quantity_rule.max != null
@@ -284,7 +269,6 @@
                             assign has_vol_pricing = true
                           endif
                         -%}
-                        
                         <td
                           class="cart-item__quantity {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %}"
                           role="cell"
@@ -293,56 +277,48 @@
                           <quantity-popover>
                             <div class="cart-item__quantity-wrapper quantity-popover-wrapper">
                               <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-                                {%- if item.properties._free_gift -%}
-                                  <div class="quantity cart-quantity gift-badge">
-                                    🎁 Gift
-                                  </div>
-                                {%- else -%}
-                                  <quantity-input class="quantity cart-quantity">
-                                    <button class="quantity__button" name="minus" type="button">
-                                      <span class="visually-hidden">
-                                        {{-
-                                          'products.product.quantity.decrease'
-                                          | t: product: item.product.title
-                                          | escape
-                                        -}}
-                                      </span>
-                                      {% render 'icon-minus' %}
-                                    </button>
-                                    <input
-                                      class="quantity__input"
-                                      type="number"
-                                      data-quantity-variant-id="{{ item.variant.id }}"
-                                      name="updates[]"
-                                      value="{{ item.quantity }}"
-                                      {% # theme-check-disable %}
-                                      data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
-                                      min="0"
-                                      {% if item.properties._offer_item %}
-                                        max="1"
-                                      {% elsif item.variant.quantity_rule.max != null %}
-                                        max="{{ item.variant.quantity_rule.max }}"
-                                      {% endif %}
-                                      step="{{ item.variant.quantity_rule.increment }}"
-                                      {% # theme-check-enable %}
-                                      aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
-                                      id="Drawer-quantity-{{ item.index | plus: 1 }}"
-                                      data-index="{{ item.index | plus: 1 }}"
-                                    >
-                                    <button class="quantity__button" name="plus" type="button"{% if item.properties._offer_item %} disabled{% endif %}>
-                                      <span class="visually-hidden">
-                                        {{-
-                                          'products.product.quantity.increase'
-                                          | t: product: item.product.title
-                                          | escape
-                                        -}}
-                                      </span>
-                                      {% render 'icon-plus' %}
-                                    </button>
-                                  </quantity-input>
-                                {%- endif -%}
+                                <quantity-input class="quantity cart-quantity">
+                                  <button class="quantity__button" name="minus" type="button">
+                                    <span class="visually-hidden">
+                                      {{-
+                                        'products.product.quantity.decrease'
+                                        | t: product: item.product.title
+                                        | escape
+                                      -}}
+                                    </span>
+                                    {% render 'icon-minus' %}
+                                  </button>
+                                  <input
+                                    class="quantity__input"
+                                    type="number"
+                                    data-quantity-variant-id="{{ item.variant.id }}"
+                                    name="updates[]"
+                                    value="{{ item.quantity }}"
+                                    {% # theme-check-disable %}
+                                    data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+                                    min="0"
+                                    data-min="{{ item.variant.quantity_rule.min }}"
+                                    {% if item.variant.quantity_rule.max != null %}
+                                      max="{{ item.variant.quantity_rule.max }}"
+                                    {% endif %}
+                                    step="{{ item.variant.quantity_rule.increment }}"
+                                    {% # theme-check-enable %}
+                                    aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
+                                    id="Drawer-quantity-{{ item.index | plus: 1 }}"
+                                    data-index="{{ item.index | plus: 1 }}"
+                                  >
+                                  <button class="quantity__button" name="plus" type="button">
+                                    <span class="visually-hidden">
+                                      {{-
+                                        'products.product.quantity.increase'
+                                        | t: product: item.product.title
+                                        | escape
+                                      -}}
+                                    </span>
+                                    {% render 'icon-plus' %}
+                                  </button>
+                                </quantity-input>
                               </div>
-                              
                               <cart-remove-button
                                 id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
                                 data-index="{{ item.index | plus: 1 }}"
@@ -357,7 +333,6 @@
                                 </button>
                               </cart-remove-button>
                             </div>
-                            
                             {%- if has_qty_rules or has_vol_pricing -%}
                               <button
                                 type="button"
@@ -374,7 +349,6 @@
                                 </span>
                               </button>
                             {%- endif -%}
-                            
                             {%- if has_vol_pricing or has_qty_rules -%}
                               <div
                                 class="cart-items__info global-settings-popup quantity-popover__info"
@@ -440,7 +414,6 @@
                                 {%- endif -%}
                               </div>
                             {%- endif -%}
-                            
                             <div
                               id="CartDrawer-LineItemError-{{ item.index | plus: 1 }}"
                               class="cart-item__error"
@@ -475,7 +448,30 @@
           <div id="CartDrawer-CartErrors" role="alert"></div>
         </form>
       </cart-drawer-items>
-      
+      <div class="drawer__footer">
+        {%- if settings.show_cart_note -%}
+          <details id="Details-CartDrawer">
+            <summary>
+              <span class="summary__title">
+                {{ 'sections.cart.note' | t }}
+                {% render 'icon-caret' %}
+              </span>
+            </summary>
+            <cart-note class="cart__note field">
+              <label class="visually-hidden" for="CartDrawer-Note">{{ 'sections.cart.note' | t }}</label>
+              <textarea
+                id="CartDrawer-Note"
+                class="text-area text-area--resize-vertical field__input"
+                name="note"
+                placeholder="{{ 'sections.cart.note' | t }}"
+              >{{ cart.note }}</textarea>
+            </cart-note>
+          </details>
+        {%- endif -%}
+
+        <!-- Start blocks -->
+        <!-- Subtotals -->
+
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
           <div>
             {%- if cart.cart_level_discount_applications.size > 0 -%}
@@ -552,44 +548,7 @@
             {{ 'sections.cart.checkout' | t }}
           </button>
         </div>
+      </div>
     </div>
   </div>
 </cart-drawer>
-
-<script>
-  // Enhanced cart data with proper error handling and integration
-  try {
-    window.cart = {{ cart | json }};
-    window.routes = {
-      cart_url: "{{ routes.cart_url }}",
-      cart_change_url: "{{ routes.cart_change_url }}",
-      cart_add_url: "{{ routes.cart_add_url }}"
-    };
-    
-    // Additional cart metadata
-    window.cartMeta = {
-      item_count: {{ cart.item_count }},
-      total_price: {{ cart.total_price }},
-      currency: "{{ cart.currency.iso_code }}",
-      total_discount: {{ cart.total_discount }}
-    };
-
-    console.log('Cart data initialized:', window.cart);
-  } catch (error) {
-    console.error('Error setting cart data:', error);
-    window.cart = { items: [], item_count: 0, total_price: 0 };
-    window.cartMeta = { item_count: 0, total_price: 0, currency: 'INR', total_discount: 0 };
-  }
-
-  // Initialize cart system when this script loads
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, cart data available:', !!window.cart);
-    
-    // Trigger initialization after a short delay to ensure all DOM is ready
-    setTimeout(function() {
-      if (window.cartInitializer) {
-        window.cartInitializer.init();
-      }
-    }, 100);
-  });
-</script>
