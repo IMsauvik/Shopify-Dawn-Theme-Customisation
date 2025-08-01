@@ -611,7 +611,7 @@ class CartProgressBar {
       
       await this.fetchCartData();
       
-      const cartDrawer = document.querySelector('cart-drawer-items');
+      const cartDrawer = document.querySelector('cart-drawer');
       if (cartDrawer && cartDrawer.renderContents) {
         cartDrawer.renderContents({ sections });
       }
