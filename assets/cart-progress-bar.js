@@ -594,9 +594,36 @@ class CartProgressBar {
   }
 
   async refreshCartDrawer() {
-    document.dispatchEvent(new CustomEvent('cart:updated'));
-    
-    await this.fetchCartData();
+    try {
+      const response = await fetch(`${window.location.pathname}?sections=cart-drawer,cart-icon-bubble`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch cart sections: ${response.status}`);
+      }
+
+      const sections = await response.json();
+      
+      await this.fetchCartData();
+      
+      const cartDrawer = document.querySelector('cart-drawer');
+      if (cartDrawer && cartDrawer.renderContents) {
+        cartDrawer.renderContents({ sections });
+      }
+
+      document.dispatchEvent(new CustomEvent('cart:updated'));
+      
+      console.log('Cart drawer refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing cart drawer:', error);
+      document.dispatchEvent(new CustomEvent('cart:updated'));
+      await this.fetchCartData();
+    }
   }
 
   updateProgress(currentAmount) {
