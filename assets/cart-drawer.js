@@ -66,6 +66,10 @@ class CartDrawer extends HTMLElement {
     });
     setTimeout(() => {
       this.querySelector('#CartDrawer-Overlay').addEventListener('click', this.close.bind(this));
+      const cartDrawerItems = document.querySelector('cart-drawer-items');
+      if (cartDrawerItems && cartDrawerItems.setupEventListeners) {
+        cartDrawerItems.setupEventListeners();
+      }
       this.open();
     });
   }
@@ -141,30 +145,33 @@ class CartItems extends HTMLElement {
   async updateCart(formData) {
     try {
       const sections = this.getSectionsToRender().map((section) => section.section || section.id);
+      
       const body = JSON.stringify({
         updates: Object.fromEntries(formData.entries()),
         sections: sections,
         sections_url: window.location.pathname,
       });
 
-      const response = await fetch(`${routes.cart_update_url}`, { ...fetchConfig(), ...{ body } });
+      const response = await fetch(`${routes.cart_change_url}`, { 
+        ...fetchConfig(), 
+        ...{ body } 
+      });
 
       if (!response.ok) {
         throw new Error(`Cart update failed: ${response.status}`);
       }
 
-      const responseData = await response.text();
-      const parsedState = JSON.parse(responseData);
+      const responseData = await response.json();
       
-      if (parsedState.sections) {
-        this.renderContents({ sections: parsedState.sections });
+      if (responseData.sections) {
+        this.renderContents({ sections: responseData.sections });
       }
 
       document.dispatchEvent(new CustomEvent('cart:updated', {
-        detail: { cartData: parsedState }
+        detail: { cartData: responseData }
       }));
 
-      return parsedState;
+      return responseData;
     } catch (error) {
       console.error('Error updating cart:', error);
       throw error;
