@@ -618,9 +618,60 @@ class CartProgressBar {
   }
 
   async refreshCartDrawer() {
-    document.dispatchEvent(new CustomEvent('cart:updated'));
-    
-    await this.fetchCartData();
+    try {
+      const cartDrawer = document.querySelector('cart-drawer');
+      if (!cartDrawer) {
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        await this.fetchCartData();
+        return;
+      }
+
+      const sectionsToRender = cartDrawer.getSectionsToRender();
+      if (!sectionsToRender || sectionsToRender.length === 0) {
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        await this.fetchCartData();
+        return;
+      }
+
+      const sectionsUrl = window.location.pathname;
+      const sectionIds = sectionsToRender.map(section => section.section || section.id).join(',');
+      
+      const response = await fetch(`${sectionsUrl}?sections=${sectionIds}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      });
+
+      if (response.ok) {
+        const sectionsText = await response.text();
+        const sectionsHtml = new DOMParser().parseFromString(sectionsText, 'text/html');
+        
+        const sections = {};
+        sectionsToRender.forEach(section => {
+          const sectionId = section.section || section.id;
+          const sectionElement = sectionsHtml.querySelector(`[data-section-id="${sectionId}"]`);
+          if (sectionElement) {
+            sections[sectionId] = sectionElement.outerHTML;
+          }
+        });
+
+        cartDrawer.renderContents({
+          sections: sections,
+          id: null
+        });
+      } else {
+        throw new Error(`Failed to fetch sections: ${response.status}`);
+      }
+
+      await this.fetchCartData();
+      
+    } catch (error) {
+      console.error('Error refreshing cart drawer:', error);
+      document.dispatchEvent(new CustomEvent('cart:updated'));
+      await this.fetchCartData();
+    }
   }
 
   updateProgress(currentAmount) {
