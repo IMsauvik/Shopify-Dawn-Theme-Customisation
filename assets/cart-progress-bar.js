@@ -1,7 +1,7 @@
 class CartProgressBar {
   constructor() {
     this.thresholds = [
-      { amount: 49900, type: 'shipping', message: 'Free Shipping Unlocked!', benefit: 'free shipping' },
+      { amount: 50000, type: 'shipping', message: 'Free Shipping Unlocked!', benefit: 'free shipping' },
       { amount: 159900, type: 'discount', message: '10% Discount Applied!', benefit: '10% discount' },
       { amount: 249900, type: 'discount', message: '15% Discount Applied!', benefit: '15% discount' },
       { amount: 349900, type: 'discount', message: '20% Discount Applied!', benefit: '20% discount' }
@@ -12,10 +12,10 @@ class CartProgressBar {
       JSON.parse(sessionStorage.getItem('cart_achieved_milestones') || '[]')
     );
     
-    this.offersCollection = 'rs-9';
+    this.offersCollection = 'dencrus';
     this.availableOffers = [];
     this.addedOffers = new Set();
-    this.offerActivationThreshold = 49900;
+    this.offerActivationThreshold = 50000;
     this.offerMilestone = 50000;
     this.isLoading = false;
     this.isInitialized = false;
