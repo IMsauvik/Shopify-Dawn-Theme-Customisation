@@ -478,26 +478,26 @@ cart-drawer.is-empty .offers-section {
   }
 
   .offer-card {
-    flex: 0 0 110px;
-    padding: 0.6rem;
+    flex: 0 0 95px;
+    padding: 0.4rem;
   }
 
   .offer-image {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
   }
 
   .offer-title {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
 
   .offer-price {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .offer-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.65rem;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.6rem;
   }
 }
 
