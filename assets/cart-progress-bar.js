@@ -618,52 +618,9 @@ class CartProgressBar {
   }
 
   async refreshCartDrawer() {
-    try {
-      const cartDrawer = document.querySelector('cart-drawer');
-      if (cartDrawer) {
-        const sectionsToRender = cartDrawer.getSectionsToRender();
-        const sectionsUrl = window.location.pathname;
-        
-        const response = await fetch('/cart.js', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          const cartData = await response.json();
-          
-          const sectionsResponse = await fetch(`${sectionsUrl}?sections=${sectionsToRender.map(s => s.section || s.id).join(',')}`);
-          if (sectionsResponse.ok) {
-            const sectionsText = await sectionsResponse.text();
-            const sectionsHtml = new DOMParser().parseFromString(sectionsText, 'text/html');
-            
-            sectionsToRender.forEach(section => {
-              const sectionElement = section.selector ? 
-                document.querySelector(section.selector) : 
-                document.getElementById(section.id);
-              
-              if (sectionElement) {
-                const newContent = sectionsHtml.querySelector(`[data-section-id="${section.section || section.id}"]`);
-                if (newContent) {
-                  sectionElement.innerHTML = newContent.innerHTML;
-                }
-              }
-            });
-          }
-        }
-      }
-      
-      document.dispatchEvent(new CustomEvent('cart:updated'));
-      
-      await this.fetchCartData();
-    } catch (error) {
-      console.error('Error refreshing cart drawer:', error);
-      document.dispatchEvent(new CustomEvent('cart:updated'));
-      await this.fetchCartData();
-    }
+    document.dispatchEvent(new CustomEvent('cart:updated'));
+    
+    await this.fetchCartData();
   }
 
   updateProgress(currentAmount) {
