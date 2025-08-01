@@ -140,36 +140,31 @@ class CartItems extends HTMLElement {
 
   async updateCart(formData) {
     try {
+      const sections = this.getSectionsToRender().map((section) => section.section || section.id);
       const body = JSON.stringify({
         updates: Object.fromEntries(formData.entries()),
-        sections: this.getSectionsToRender().map((section) => section.section || section.id),
+        sections: sections,
         sections_url: window.location.pathname,
       });
 
-      const response = await fetch(`${window.routes.cart_update_url}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: body
-      });
+      const response = await fetch(`${routes.cart_update_url}`, { ...fetchConfig(), ...{ body } });
 
       if (!response.ok) {
         throw new Error(`Cart update failed: ${response.status}`);
       }
 
-      const responseData = await response.json();
+      const responseData = await response.text();
+      const parsedState = JSON.parse(responseData);
       
-      if (responseData.sections) {
-        this.renderContents({ sections: responseData.sections });
+      if (parsedState.sections) {
+        this.renderContents({ sections: parsedState.sections });
       }
 
       document.dispatchEvent(new CustomEvent('cart:updated', {
-        detail: { cartData: responseData }
+        detail: { cartData: parsedState }
       }));
 
-      return responseData;
+      return parsedState;
     } catch (error) {
       console.error('Error updating cart:', error);
       throw error;
@@ -231,8 +226,8 @@ class CartDrawerItems extends CartItems {
 customElements.define('cart-drawer-items', CartDrawerItems);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const cartDrawer = document.querySelector('cart-drawer-items');
-  if (cartDrawer) {
-    cartDrawer.setupEventListeners();
+  const cartDrawerItems = document.querySelector('cart-drawer-items');
+  if (cartDrawerItems) {
+    cartDrawerItems.setupEventListeners();
   }
 });
