@@ -115,7 +115,7 @@ class CartProgressBar {
   }
 
   calculateAllowedOffers(currentAmount) {
-    return Math.floor((currentAmount - this.offerActivationThreshold) / this.offerMilestone);
+    return Math.floor(currentAmount / 50000);
   }
 
   setupEventListeners() {
@@ -593,10 +593,85 @@ class CartProgressBar {
     return response.json();
   }
 
-  async refreshCartDrawer() {
-    document.dispatchEvent(new CustomEvent('cart:updated'));
+  async enforceOfferLimits() {
+    const currentAmount = this.mainProductsTotal;
+    const allowedOffers = this.calculateAllowedOffers(currentAmount);
+    const currentOfferCount = this.addedOffers.size;
     
-    await this.fetchCartData();
+    if (currentOfferCount > allowedOffers) {
+      const offersToRemove = Array.from(this.addedOffers).slice(allowedOffers);
+      
+      for (const variantId of offersToRemove) {
+        try {
+          await this.removeOfferFromCart(variantId);
+          this.addedOffers.delete(variantId);
+          this.showCelebration(`₹9 product removed due to cart value change`);
+        } catch (error) {
+          console.error('Error removing excess offer:', error);
+        }
+      }
+      
+      if (offersToRemove.length > 0) {
+        await this.refreshCartDrawer();
+      }
+    }
+  }
+
+  async refreshCartDrawer() {
+    try {
+      const cartDrawer = document.querySelector('cart-drawer');
+      if (!cartDrawer) {
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        await this.fetchCartData();
+        return;
+      }
+
+      const sectionsToRender = cartDrawer.getSectionsToRender();
+      if (!sectionsToRender || sectionsToRender.length === 0) {
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        await this.fetchCartData();
+        return;
+      }
+
+      const sectionsUrl = window.location.pathname;
+      const sectionIds = sectionsToRender.map(section => section.section || section.id).join(',');
+      
+      const response = await fetch(`${sectionsUrl}?sections=${sectionIds}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      });
+
+      if (response.ok) {
+        const sectionsText = await response.text();
+        const sectionsHtml = new DOMParser().parseFromString(sectionsText, 'text/html');
+        
+        const sections = {};
+        sectionsToRender.forEach(section => {
+          const sectionId = section.section || section.id;
+          const sectionElement = sectionsHtml.querySelector(`[data-section-id="${sectionId}"]`);
+          if (sectionElement) {
+            sections[sectionId] = sectionElement.outerHTML;
+          }
+        });
+
+        cartDrawer.renderContents({
+          sections: sections,
+          id: null
+        });
+      } else {
+        throw new Error(`Failed to fetch sections: ${response.status}`);
+      }
+
+      await this.fetchCartData();
+      
+    } catch (error) {
+      console.error('Error refreshing cart drawer:', error);
+      document.dispatchEvent(new CustomEvent('cart:updated'));
+      await this.fetchCartData();
+    }
   }
 
   updateProgress(currentAmount) {
@@ -611,6 +686,9 @@ class CartProgressBar {
     
     this.updateMilestones(currentAmount);
     this.updateProgressMessage(currentAmount);
+    this.updateOffersSection(currentAmount);
+    
+    this.enforceOfferLimits();
   }
 
   updateMilestones(currentAmount) {
@@ -846,9 +924,12 @@ class CartProgressBar {
     }
     
     window.cartProgressBar = new CartProgressBar();
+    window.cartProgressBarInstance = window.cartProgressBar;
     return window.cartProgressBar;
   }
 }
+
+window.cartProgressBarInstance = null;
 
 const cartProgressBarStyles = `
 <style>
@@ -1053,10 +1134,10 @@ const cartProgressBarStyles = `
 }
 
 .offer-card {
-  flex: 0 0 120px;
+  flex: 0 0 100px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 8px;
+  padding: 6px;
   text-align: center;
   transition: all 0.3s ease;
   background: white;
@@ -1078,19 +1159,19 @@ const cartProgressBarStyles = `
 }
 
 .offer-image {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .offer-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  margin: 0 0 4px 0;
-  line-height: 1.3;
-  height: 28px;
+  margin: 0 0 3px 0;
+  line-height: 1.2;
+  height: 24px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1098,20 +1179,20 @@ const cartProgressBarStyles = `
 }
 
 .offer-price {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   color: #e74c3c;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
 }
 
 .offer-btn {
   width: 100%;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border: 1px solid #3498db;
   background: white;
   color: #3498db;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1161,12 +1242,12 @@ const cartProgressBarStyles = `
   }
   
   .offer-card {
-    flex: 0 0 100px;
+    flex: 0 0 85px;
   }
   
   .offer-image {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
   }
 }
 </style>
